@@ -65,7 +65,6 @@
     "@audio/effect-delay": "^1.0.0",
     "@audio/effect-multitap": "^1.0.0",
     "@audio/effect-pingpong": "^1.0.0",
-    "@audio/effect-reverb": "^1.0.0",
     "@audio/effect-distortion": "^1.0.0",
     "@audio/effect-bitcrusher": "^1.0.0",
     "@audio/effect-exciter": "^1.0.0",

@@ -1,15 +1,15 @@
 {
-  "name": "@audio/effect-freeverb",
+  "name": "@audio/effect-lofi",
   "version": "0.0.0",
-  "description": "Freeverb — Schroeder-Moorer 8-comb + 4-allpass stereo reverb",
+  "description": "Lo-fi character — wow/flutter, vinyl noise, crackle, bandwidth ceiling (RC-20 class)",
   "type": "module",
   "sideEffects": false,
   "private": true,
   "keywords": [
     "audio",
     "dsp",
-    "reverb",
-    "freeverb"
+    "effect",
+    "lofi"
   ],
   "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",

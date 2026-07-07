@@ -186,37 +186,6 @@ test('mixer — sums buffers', () => {
 // Delay — Reverb
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('reverb — produces wet signal without NaN', () => {
-	let data = impulse(44100)
-	fx.reverb(data, { decay: 0.84, damping: 0.5, mix: 0.5, fs: 44100 })
-	ok(data.some(x => Math.abs(x) > 0.001), 'reverb has output')
-	ok(data.every(isFinite), 'no NaN/Inf')
-})
-
-test('reverb — mix=0 is passthrough', () => {
-	let data = impulse(256)
-	let orig = Float64Array.from(data)
-	fx.reverb(data, { mix: 0, fs: 44100 })
-	let maxErr = 0
-	for (let i = 0; i < data.length; i++) { let e = Math.abs(data[i] - orig[i]); if (e > maxErr) maxErr = e }
-	ok(maxErr < 1e-10, `reverb mix=0 passthrough: err=${maxErr}`)
-})
-
-test('reverb — decays over time', () => {
-	let N = 44100
-	let data = impulse(N)
-	fx.reverb(data, { decay: 0.84, mix: 1, fs: 44100 })
-	// First reflections arrive after ~1300 samples (shortest comb delay)
-	let early = 0, late = 0
-	for (let i = 2000; i < 6000; i++) early = Math.max(early, Math.abs(data[i]))
-	for (let i = 30000; i < 44100; i++) late = Math.max(late, Math.abs(data[i]))
-	ok(early > late, `reverb decays: early=${early.toFixed(4)}, late=${late.toFixed(6)}`)
-})
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Distortion
-// ═══════════════════════════════════════════════════════════════════════════
-
 test('distortion — soft clip limits to ±1', () => {
 	let data = dc(256, 5)
 	fx.distortion(data, { drive: 0.5, type: 'soft' })

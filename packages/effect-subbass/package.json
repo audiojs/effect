@@ -1,16 +1,15 @@
 {
-  "name": "@audio/effect-convolver",
+  "name": "@audio/effect-subbass",
   "version": "0.0.0",
-  "description": "Convolution reverb — partitioned FFT convolution with impulse responses",
+  "description": "Psychoacoustic bass enhancer — harmonic synthesis below cutoff (MaxxBass/RBass class)",
   "type": "module",
   "sideEffects": false,
   "private": true,
   "keywords": [
     "audio",
     "dsp",
-    "reverb",
-    "convolution",
-    "impulse-response"
+    "effect",
+    "subbass"
   ],
   "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",

@@ -1,16 +1,15 @@
 {
-  "name": "@audio/effect-dattorro",
+  "name": "@audio/effect-stutter",
   "version": "0.0.0",
-  "description": "Dattorro plate reverb — figure-eight tank (Dattorro 1997)",
+  "description": "Stutter / beat-repeat — sliced buffer retrigger (Ableton Beat Repeat class)",
   "type": "module",
   "sideEffects": false,
   "private": true,
   "keywords": [
     "audio",
     "dsp",
-    "reverb",
-    "plate",
-    "dattorro"
+    "effect",
+    "stutter"
   ],
   "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",

@@ -1,5 +1,5 @@
 {
-  "name": "audio-effect",
+  "name": "@audio/effect",
   "version": "1.0.1",
   "type": "module",
   "sideEffects": false,
@@ -45,9 +45,26 @@
     "distortion",
     "bitcrusher"
   ],
-  "license": "ISC",
-  "repository": "audiojs/audio-effect",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audiojs/audio-effect.git"
+  },
   "devDependencies": {
-    "digital-filter": "file:../digital-filter"
-  }
+    "digital-filter": "file:../../digital-filter"
+  },
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "workspaces": [
+    "packages/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bugs": {
+    "url": "https://github.com/audiojs/audio-effect/issues"
+  },
+  "homepage": "https://github.com/audiojs/audio-effect#readme"
 }

@@ -1,0 +1,39 @@
+{
+  "name": "@audio/effect-ringmod",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "ring-mod.js"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "description": "Ring modulator — multiplies signal by a carrier oscillator",
+  "keywords": [
+    "audio",
+    "dsp",
+    "effect",
+    "ringmod"
+  ],
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audiojs/audio-effect.git",
+    "directory": "packages/effect-ringmod"
+  },
+  "bugs": {
+    "url": "https://github.com/audiojs/audio-effect/issues"
+  },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-ringmod"
+}

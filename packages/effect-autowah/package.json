@@ -1,0 +1,39 @@
+{
+  "name": "@audio/effect-autowah",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "auto-wah.js"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "description": "Auto-wah — envelope follower drives resonant bandpass cutoff",
+  "keywords": [
+    "audio",
+    "dsp",
+    "effect",
+    "autowah"
+  ],
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audiojs/audio-effect.git",
+    "directory": "packages/effect-autowah"
+  },
+  "bugs": {
+    "url": "https://github.com/audiojs/audio-effect/issues"
+  },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-autowah"
+}

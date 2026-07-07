@@ -96,104 +96,6 @@ test('ringMod — mix=0 is passthrough', () => {
 // Dynamics
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('envelope — follows amplitude', () => {
-	let data = new Float64Array(256)
-	for (let i = 0; i < 128; i++) data[i] = Math.sin(2 * Math.PI * 1000 * i / 44100)
-	fx.envelope(data, { attack: 0.001, release: 0.01, fs: 44100 })
-	ok(data[127] > 0.5, 'envelope rises during signal')
-	ok(data[255] < data[127], 'envelope falls after signal ends')
-})
-
-test('compressor — reduces peaks above threshold', () => {
-	let data = sine(440, 4096)
-	// Scale to known amplitude
-	for (let i = 0; i < data.length; i++) data[i] *= 0.9
-	let origPeak = 0.9
-	fx.compressor(data, { threshold: -6, ratio: 4, attack: 0.001, release: 0.05, fs: 44100 })
-	let peak = 0
-	for (let i = 2048; i < 4096; i++) if (Math.abs(data[i]) > peak) peak = Math.abs(data[i])
-	ok(peak < origPeak, `compressor reduces peak: ${peak.toFixed(3)} < ${origPeak}`)
-	ok(data.every(isFinite), 'no NaN/Inf')
-})
-
-test('compressor — below threshold is untouched', () => {
-	let data = sine(440, 4096)
-	for (let i = 0; i < data.length; i++) data[i] *= 0.01 // very quiet
-	let orig = Float64Array.from(data)
-	fx.compressor(data, { threshold: -6, ratio: 4, fs: 44100 })
-	let maxDiff = 0
-	for (let i = 100; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxDiff) maxDiff = d }
-	ok(maxDiff < 0.01, `below threshold untouched: maxDiff=${maxDiff.toFixed(6)}`)
-})
-
-test('limiter — clamps signal to threshold', () => {
-	let data = sine(440, 4096)
-	fx.limiter(data, { threshold: 0.5, release: 0.01, fs: 44100 })
-	let peak = 0
-	for (let i = 0; i < data.length; i++) if (Math.abs(data[i]) > peak) peak = Math.abs(data[i])
-	ok(peak <= 0.55, `limiter peak: ${peak.toFixed(3)} ≤ 0.55`)
-})
-
-test('gate — attenuates below threshold', () => {
-	let data = new Float64Array(512)
-	// First half: loud signal; second half: quiet signal
-	for (let i = 0; i < 256; i++) data[i] = Math.sin(2 * Math.PI * 440 * i / 44100) * 0.5
-	for (let i = 256; i < 512; i++) data[i] = Math.sin(2 * Math.PI * 440 * i / 44100) * 0.001
-	fx.gate(data, { threshold: -20, range: -60, attack: 0.001, release: 0.01, fs: 44100 })
-	let loudPeak = 0, quietPeak = 0
-	for (let i = 100; i < 256; i++) if (Math.abs(data[i]) > loudPeak) loudPeak = Math.abs(data[i])
-	for (let i = 400; i < 512; i++) if (Math.abs(data[i]) > quietPeak) quietPeak = Math.abs(data[i])
-	ok(loudPeak > quietPeak * 10, `gate: loud (${loudPeak.toFixed(4)}) >> quiet (${quietPeak.toFixed(6)})`)
-})
-
-test('transientShaper — produces output without NaN', () => {
-	let data = impulse(4096)
-	// Add some signal
-	for (let i = 0; i < 100; i++) data[i] = Math.sin(2 * Math.PI * 440 * i / 44100) * (1 - i / 100)
-	fx.transientShaper(data, { attackGain: 2, sustainGain: -0.5, fs: 44100 })
-	ok(data.every(isFinite), 'no NaN/Inf')
-	ok(data.some(x => Math.abs(x) > 0.001), 'has output')
-})
-
-test('expander — attenuates signal below threshold', () => {
-	let data = new Float64Array(2048)
-	// Quiet signal far below threshold
-	for (let i = 0; i < 2048; i++) data[i] = Math.sin(2 * Math.PI * 440 * i / 44100) * 0.001
-	let origPeak = 0.001
-	fx.expander(data, { threshold: -20, ratio: 4, release: 0.001, fs: 44100 })
-	let peak = 0
-	for (let i = 500; i < 2048; i++) if (Math.abs(data[i]) > peak) peak = Math.abs(data[i])
-	ok(peak < origPeak, `expander attenuates quiet signal: ${peak.toFixed(6)} < ${origPeak}`)
-	ok(data.every(isFinite), 'no NaN/Inf')
-})
-
-test('expander — leaves loud signal above threshold untouched', () => {
-	let data = sine(440, 2048)
-	for (let i = 0; i < 2048; i++) data[i] *= 0.8
-	let orig = Float64Array.from(data)
-	fx.expander(data, { threshold: -40, ratio: 2, fs: 44100 })
-	let maxDiff = 0
-	for (let i = 200; i < 2048; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxDiff) maxDiff = d }
-	ok(maxDiff < 0.01, `above threshold untouched: maxDiff=${maxDiff.toFixed(6)}`)
-})
-
-test('expander — higher ratio = more attenuation', () => {
-	let makeQuiet = () => {
-		let d = new Float64Array(1024)
-		for (let i = 0; i < 1024; i++) d[i] = Math.sin(2 * Math.PI * 440 * i / 44100) * 0.005
-		return d
-	}
-	let d2 = makeQuiet(), d4 = makeQuiet()
-	fx.expander(d2, { threshold: -20, ratio: 2, release: 0.001, fs: 44100 })
-	fx.expander(d4, { threshold: -20, ratio: 4, release: 0.001, fs: 44100 })
-	let peak = d => { let p = 0; for (let x of d) if (Math.abs(x) > p) p = Math.abs(x); return p }
-	ok(peak(d4) < peak(d2), `ratio=4 more attenuation than ratio=2`)
-})
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Delay
-// ═══════════════════════════════════════════════════════════════════════════
-
 test('delay — echo at specified time', () => {
 	let N = 44100
 	let data = impulse(N)
@@ -240,56 +142,6 @@ test('pingPong — creates alternating echoes', () => {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Spatial
-// ═══════════════════════════════════════════════════════════════════════════
-
-test('stereoWidener — width=0 produces mono', () => {
-	let L = sine(440, 256), R = sine(880, 256)
-	fx.stereoWidener(L, R, { width: 0 })
-	let maxDiff = 0
-	for (let i = 0; i < L.length; i++) { let d = Math.abs(L[i] - R[i]); if (d > maxDiff) maxDiff = d }
-	ok(maxDiff < 1e-10, `width=0 mono: maxDiff=${maxDiff}`)
-})
-
-test('stereoWidener — width=1 is passthrough', () => {
-	let L = sine(440, 256), R = sine(880, 256)
-	let origL = Float64Array.from(L), origR = Float64Array.from(R)
-	fx.stereoWidener(L, R, { width: 1 })
-	let maxErr = 0
-	for (let i = 0; i < L.length; i++) {
-		let eL = Math.abs(L[i] - origL[i]), eR = Math.abs(R[i] - origR[i])
-		if (eL > maxErr) maxErr = eL
-		if (eR > maxErr) maxErr = eR
-	}
-	ok(maxErr < 1e-10, `width=1 passthrough: err=${maxErr}`)
-})
-
-test('haas — delays one channel', () => {
-	let L = impulse(4096), R = impulse(4096)
-	fx.haas(L, R, { time: 0.02, channel: 'right', fs: 44100 })
-	// Left should still have impulse at 0
-	ok(Math.abs(L[0] - 1) < 1e-10, 'left unchanged')
-	// Right should be delayed
-	let peakIdx = 0
-	for (let i = 0; i < R.length; i++) if (R[i] > R[peakIdx]) peakIdx = i
-	ok(Math.abs(peakIdx - 882) < 5, `right delayed to sample ${peakIdx} (expected ~882)`)
-})
-
-test('panner — pan=0 center', () => {
-	let L = dc(256, 1), R = dc(256, 1)
-	fx.panner(L, R, { pan: 0 })
-	// Both channels should be equal at center
-	ok(Math.abs(L[128] - R[128]) < 0.01, 'center: L ≈ R')
-})
-
-test('panner — pan=-1 full left', () => {
-	let L = dc(256, 1), R = dc(256, 1)
-	fx.panner(L, R, { pan: -1 })
-	ok(Math.abs(R[128]) < 0.01, 'full left: R ≈ 0')
-	ok(L[128] > 0.5, 'full left: L > 0')
-})
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Utility
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('slewLimiter — limits rate of change', () => {
@@ -443,26 +295,6 @@ test('bitcrusher — no NaN/Inf', () => {
 // Modulation — Pitch Shifter & Auto-wah
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('pitchShifter — produces output without NaN', () => {
-	let data = sine(440, 4096)
-	fx.pitchShifter(data, { shift: 1.5, grain: 512, fs: 44100 })
-	ok(data.every(isFinite), 'no NaN/Inf')
-	ok(data.some(x => Math.abs(x) > 0.01), 'has output')
-})
-
-test('pitchShifter — shift=1 produces signal', () => {
-	let data = sine(440, 4096)
-	fx.pitchShifter(data, { shift: 1.0, grain: 512, fs: 44100 })
-	ok(data.every(isFinite), 'no NaN/Inf with shift=1')
-	ok(data.some(x => Math.abs(x) > 0.01), 'has output at shift=1')
-})
-
-test('pitchShifter — stable over long buffer', () => {
-	let data = sine(440, 44100)
-	fx.pitchShifter(data, { shift: 2.0, grain: 1024, fs: 44100 })
-	ok(data.every(isFinite), 'no NaN/Inf over 1s')
-})
-
 test('autoWah — produces output without NaN', () => {
 	let data = sine(440, 4096)
 	fx.autoWah(data, { base: 300, range: 3000, Q: 5, fs: 44100 })
@@ -548,21 +380,3 @@ test('frequencyShifter — mix=0 is passthrough', () => {
 // Auto-panner
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('autoPanner — depth=0 is passthrough', () => {
-	let L = dc(4096, 1), R = dc(4096, 1)
-	fx.autoPanner(L, R, { rate: 1, depth: 0, fs: 44100 })
-	ok(Math.abs(L[2048] - R[2048]) < 1e-10, 'depth=0: L ≈ R')
-})
-
-test('autoPanner — sweeps between channels', () => {
-	let fs = 44100, N = fs   // 1 s
-	let L = dc(N, 1), R = dc(N, 1)
-	fx.autoPanner(L, R, { rate: 1, depth: 1, fs })
-	let maxL = 0, maxR = 0
-	for (let i = 0; i < N; i++) {
-		if (L[i] > maxL) maxL = L[i]
-		if (R[i] > maxR) maxR = R[i]
-	}
-	ok(maxL > 0.9 && maxR > 0.9, `both sides reached: L=${maxL.toFixed(2)} R=${maxR.toFixed(2)}`)
-	ok(L.every(isFinite) && R.every(isFinite), 'no NaN/Inf')
-})

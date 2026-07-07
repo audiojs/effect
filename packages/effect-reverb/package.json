@@ -1,39 +1,38 @@
 {
   "name": "@audio/effect-reverb",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Reverb — Schroeder reverb: parallel feedback comb filters + series allpass",
   "type": "module",
   "sideEffects": false,
-  "main": "index.js",
+  "main": "reverb.js",
   "exports": {
-    ".": "./index.js",
+    ".": "./reverb.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
     "reverb.js"
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "description": "Reverb — Schroeder reverb: parallel feedback comb filters + series allpass",
   "keywords": [
     "audio",
     "dsp",
     "effect",
     "reverb"
   ],
+  "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/audio-effect.git",
     "directory": "packages/effect-reverb"
   },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-reverb",
   "bugs": {
     "url": "https://github.com/audiojs/audio-effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-reverb"
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

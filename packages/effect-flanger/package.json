@@ -1,39 +1,38 @@
 {
   "name": "@audio/effect-flanger",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Flanger — modulated short delay with feedback",
   "type": "module",
   "sideEffects": false,
-  "main": "index.js",
+  "main": "flanger.js",
   "exports": {
-    ".": "./index.js",
+    ".": "./flanger.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
     "flanger.js"
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "description": "Flanger — modulated short delay with feedback",
   "keywords": [
     "audio",
     "dsp",
     "effect",
     "flanger"
   ],
+  "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/audio-effect.git",
     "directory": "packages/effect-flanger"
   },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-flanger",
   "bugs": {
     "url": "https://github.com/audiojs/audio-effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-flanger"
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,39 +1,38 @@
 {
   "name": "@audio/effect-tremolo",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Tremolo — amplitude modulation via LFO",
   "type": "module",
   "sideEffects": false,
-  "main": "index.js",
+  "main": "tremolo.js",
   "exports": {
-    ".": "./index.js",
+    ".": "./tremolo.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
     "tremolo.js"
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "description": "Tremolo — amplitude modulation via LFO",
   "keywords": [
     "audio",
     "dsp",
     "effect",
     "tremolo"
   ],
+  "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/audio-effect.git",
     "directory": "packages/effect-tremolo"
   },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-tremolo",
   "bugs": {
     "url": "https://github.com/audiojs/audio-effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-tremolo"
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

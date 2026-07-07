@@ -1,37 +1,21 @@
 {
   "name": "@audio/effect",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "type": "module",
   "sideEffects": false,
-  "description": "Audio effects – modulation, dynamics, delay, spatial, utility, distortion",
+  "description": "Audio effects — umbrella for @audio/effect-* atoms (modulation, delay, distortion, utility)",
   "exports": {
     ".": "./index.js",
-    "./modulation": "./modulation/index.js",
-    "./modulation/*": "./modulation/*",
-    "./dynamics": "./dynamics/index.js",
-    "./dynamics/*": "./dynamics/*",
-    "./delay": "./delay/index.js",
-    "./delay/*": "./delay/*",
-    "./spatial": "./spatial/index.js",
-    "./spatial/*": "./spatial/*",
-    "./utility": "./utility/index.js",
-    "./utility/*": "./utility/*",
-    "./distortion": "./distortion/index.js",
-    "./distortion/*": "./distortion/*"
+    "./package.json": "./package.json"
   },
   "scripts": {
     "test": "node test.js",
-    "plot": "node plot/generate.js"
+    "plot": "node plot/generate.js",
+    "test:all": "npm test --workspaces --if-present && npm test",
+    "publish:all": "npm publish --workspaces && npm publish"
   },
   "files": [
-    "modulation",
-    "dynamics",
-    "delay",
-    "spatial",
-    "utility",
-    "distortion",
-    "index.js",
-    "plot"
+    "index.js"
   ],
   "keywords": [
     "audio",
@@ -66,5 +50,28 @@
   "bugs": {
     "url": "https://github.com/audiojs/audio-effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect#readme"
+  "homepage": "https://github.com/audiojs/audio-effect#readme",
+  "main": "index.js",
+  "dependencies": {
+    "@audio/effect-phaser": "^1.0.0",
+    "@audio/effect-flanger": "^1.0.0",
+    "@audio/effect-chorus": "^1.0.0",
+    "@audio/effect-wah": "^1.0.0",
+    "@audio/effect-autowah": "^1.0.0",
+    "@audio/effect-tremolo": "^1.0.0",
+    "@audio/effect-vibrato": "^1.0.0",
+    "@audio/effect-ringmod": "^1.0.0",
+    "@audio/effect-freqshift": "^1.0.0",
+    "@audio/effect-delay": "^1.0.0",
+    "@audio/effect-multitap": "^1.0.0",
+    "@audio/effect-pingpong": "^1.0.0",
+    "@audio/effect-reverb": "^1.0.0",
+    "@audio/effect-distortion": "^1.0.0",
+    "@audio/effect-bitcrusher": "^1.0.0",
+    "@audio/effect-exciter": "^1.0.0",
+    "@audio/effect-gain": "^1.0.0",
+    "@audio/effect-mixer": "^1.0.0",
+    "@audio/effect-slew": "^1.0.0",
+    "@audio/effect-noiseshaper": "^1.0.0"
+  }
 }

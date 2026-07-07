@@ -1,39 +1,38 @@
 {
   "name": "@audio/effect-pingpong",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Ping-pong delay — stereo: left and right delays alternate",
   "type": "module",
   "sideEffects": false,
-  "main": "index.js",
+  "main": "ping-pong.js",
   "exports": {
-    ".": "./index.js",
+    ".": "./ping-pong.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
     "ping-pong.js"
   ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "description": "Ping-pong delay — stereo: left and right delays alternate",
   "keywords": [
     "audio",
     "dsp",
     "effect",
     "pingpong"
   ],
+  "license": "MIT",
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/audio-effect.git",
     "directory": "packages/effect-pingpong"
   },
+  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-pingpong",
   "bugs": {
     "url": "https://github.com/audiojs/audio-effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect/tree/main/packages/effect-pingpong"
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

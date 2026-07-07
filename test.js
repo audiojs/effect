@@ -485,3 +485,84 @@ test('autoWah — louder input drives envelope higher', () => {
 	fx.autoWah(quiet, p2)
 	ok(p1._env > p2._env, `loud env (${p1._env.toFixed(3)}) > quiet env (${p2._env.toFixed(4)})`)
 })
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Exciter
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('exciter — amount=0 is passthrough', () => {
+	let data = sine(440, 4096)
+	let orig = Float64Array.from(data)
+	fx.exciter(data, { amount: 0, freq: 3000, drive: 0.5, fs: 44100 })
+	let maxErr = 0
+	for (let i = 0; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxErr) maxErr = d }
+	ok(maxErr < 1e-10, `exciter amount=0 passthrough: err=${maxErr}`)
+})
+
+test('exciter — adds harmonics on high-band input', () => {
+	let data = sine(4000, 4096)
+	let orig = Float64Array.from(data)
+	fx.exciter(data, { amount: 0.8, freq: 2000, drive: 0.8, fs: 44100 })
+	let maxDiff = 0
+	for (let i = 2048; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxDiff) maxDiff = d }
+	ok(maxDiff > 0.01, `exciter modifies high-band: maxDiff=${maxDiff.toFixed(3)}`)
+	ok(data.every(isFinite), 'no NaN/Inf')
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Frequency shifter
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('frequencyShifter — shift=0 is near-passthrough (minus Hilbert delay)', () => {
+	let data = sine(440, 8192)
+	fx.frequencyShifter(data, { shift: 0, fs: 44100 })
+	ok(data.every(isFinite), 'no NaN/Inf at shift=0')
+	ok(data.some(x => Math.abs(x) > 0.5), 'signal preserved at shift=0')
+})
+
+test('frequencyShifter — 200 Hz up shifts peak to ~640 Hz', () => {
+	let N = 8192
+	let data = sine(440, N)
+	fx.frequencyShifter(data, { shift: 200, taps: 65, fs: 44100 })
+	// FFT-free test: Goertzel at 440 vs 640 Hz
+	let goertzel = (x, f, fs) => {
+		let k = 2 * Math.cos(2 * Math.PI * f / fs), s1 = 0, s2 = 0
+		for (let i = 200; i < x.length; i++) { let s0 = x[i] + k * s1 - s2; s2 = s1; s1 = s0 }
+		return s1 * s1 + s2 * s2 - k * s1 * s2
+	}
+	let e440 = goertzel(data, 440, 44100)
+	let e640 = goertzel(data, 640, 44100)
+	ok(e640 > e440, `shifted energy at 640Hz (${e640.toFixed(0)}) > original 440Hz (${e440.toFixed(0)})`)
+})
+
+test('frequencyShifter — mix=0 is passthrough', () => {
+	let data = sine(440, 4096)
+	let orig = Float64Array.from(data)
+	fx.frequencyShifter(data, { shift: 100, mix: 0, fs: 44100 })
+	let maxErr = 0
+	for (let i = 0; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxErr) maxErr = d }
+	ok(maxErr < 1e-10, `mix=0 passthrough: err=${maxErr}`)
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Auto-panner
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('autoPanner — depth=0 is passthrough', () => {
+	let L = dc(4096, 1), R = dc(4096, 1)
+	fx.autoPanner(L, R, { rate: 1, depth: 0, fs: 44100 })
+	ok(Math.abs(L[2048] - R[2048]) < 1e-10, 'depth=0: L ≈ R')
+})
+
+test('autoPanner — sweeps between channels', () => {
+	let fs = 44100, N = fs   // 1 s
+	let L = dc(N, 1), R = dc(N, 1)
+	fx.autoPanner(L, R, { rate: 1, depth: 1, fs })
+	let maxL = 0, maxR = 0
+	for (let i = 0; i < N; i++) {
+		if (L[i] > maxL) maxL = L[i]
+		if (R[i] > maxR) maxR = R[i]
+	}
+	ok(maxL > 0.9 && maxR > 0.9, `both sides reached: L=${maxL.toFixed(2)} R=${maxR.toFixed(2)}`)
+	ok(L.every(isFinite) && R.every(isFinite), 'no NaN/Inf')
+})

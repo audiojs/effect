@@ -5,7 +5,7 @@ Canonical audio effect implementations.
 <table><tr><td valign="top">
 
 **[Modulation](#modulation)**<br>
-<sub>[Phaser](#phaser) · [Flanger](#flanger) · [Chorus](#chorus) · [Wah-wah](#wah-wah) · [Tremolo](#tremolo) · [Vibrato](#vibrato) · [Ring mod](#ring-mod) · [Pitch shifter](#pitch-shifter) · [Auto-wah](#auto-wah)</sub>
+<sub>[Phaser](#phaser) · [Flanger](#flanger) · [Chorus](#chorus) · [Wah-wah](#wah-wah) · [Tremolo](#tremolo) · [Vibrato](#vibrato) · [Ring mod](#ring-mod) · [Frequency shifter](#frequency-shifter) · [Pitch shifter](#pitch-shifter) · [Auto-wah](#auto-wah)</sub>
 
 **[Dynamics](#dynamics)**<br>
 <sub>[Compressor](#compressor) · [Limiter](#limiter) · [Noise gate](#noise-gate) · [Envelope follower](#envelope-follower) · [Transient shaper](#transient-shaper) · [Expander](#expander)</sub>
@@ -16,10 +16,10 @@ Canonical audio effect implementations.
 </td><td valign="top">
 
 **[Distortion](#distortion)**<br>
-<sub>[Distortion / saturation](#distortion--saturation) · [Bitcrusher](#bitcrusher)</sub>
+<sub>[Distortion / saturation](#distortion--saturation) · [Exciter](#exciter) · [Bitcrusher](#bitcrusher)</sub>
 
 **[Spatial](#spatial)**<br>
-<sub>[Stereo widener](#stereo-widener) · [Haas effect](#haas-effect) · [Panner](#panner)</sub>
+<sub>[Stereo widener](#stereo-widener) · [Haas effect](#haas-effect) · [Panner](#panner) · [Auto-panner](#auto-panner)</sub>
 
 **[Utility](#utility)**<br>
 <sub>[Gain](#gain) · [Mixer](#mixer) · [Slew limiter](#slew-limiter) · [Noise shaping](#noise-shaping)</sub>
@@ -38,11 +38,11 @@ npm install audio-effect
 import * as fx from 'audio-effect'
 
 // import by category
-import { phaser, flanger, chorus, wah, autoWah, pitchShifter } from 'audio-effect/modulation'
+import { phaser, flanger, chorus, wah, autoWah, ringMod, frequencyShifter, pitchShifter } from 'audio-effect/modulation'
 import { compressor, limiter, gate, envelope, expander }        from 'audio-effect/dynamics'
 import { delay, multitap, pingPong, reverb }                    from 'audio-effect/delay'
-import { distortion, bitcrusher }                               from 'audio-effect/distortion'
-import { stereoWidener, haas, panner }                          from 'audio-effect/spatial'
+import { distortion, exciter, bitcrusher }                      from 'audio-effect/distortion'
+import { stereoWidener, haas, panner, autoPanner }              from 'audio-effect/spatial'
 import { gain, mixer, slewLimiter, noiseShaping }               from 'audio-effect/utility'
 ```
 
@@ -206,6 +206,25 @@ for (let buf of stream) ringMod(buf, p)
 **Not for**: clean frequency shifting
 
 <!-- ![Ring mod](plot/ring-mod.svg) -->
+
+
+### Frequency shifter
+
+Single-sideband frequency shift via Hilbert transform. Every frequency moves by a constant offset (unlike [ring mod](#ring-mod), which produces sum/difference pairs; unlike [pitch shifter](#pitch-shifter), which preserves harmonic ratios). Breaks harmonic relationships → inharmonic, metallic, clangorous.
+
+**`shift`** shift in Hz (default 100 · positive = up, negative = down) · **`mix`** wet/dry 0–1 (default 1) · **`taps`** Hilbert FIR length, must be odd (default 65) · **`fs`** sample rate
+
+```js
+import { frequencyShifter } from 'audio-effect/modulation'
+
+let p = { shift: 200, fs: 44100 }
+for (let buf of stream) frequencyShifter(buf, p)
+```
+
+**Use when**: clangorous barber-pole tones, Bode-style modulation, Moog-style frequency shifting<br>
+**Not for**: musical transposition (use [pitch shifter](#pitch-shifter) or the `pitch-shift` package)
+
+<!-- ![Frequency shifter](plot/frequency-shifter.svg) -->
 
 
 ### Pitch shifter
@@ -497,6 +516,25 @@ distortion(buf, { drive: 0.7, type: 'foldback' })
 <!-- ![Distortion types](plot/distortion.svg) -->
 
 
+### Exciter
+
+Aphex-style aural exciter. Extracts the high band via SVF highpass, runs it through tanh saturation to synthesize harmonics, then mixes the harmonic residue back into the dry signal. Adds perceived "air" and "presence" without EQ boost.
+
+**`freq`** highpass cutoff Hz (default 3000) · **`drive`** saturation amount 0–1 (default 0.5, maps to 1–10× gain) · **`amount`** mix-in level 0–1 (default 0.5) · **`fs`** sample rate
+
+```js
+import { exciter } from 'audio-effect/distortion'
+
+let p = { freq: 4000, drive: 0.6, amount: 0.4, fs: 44100 }
+for (let buf of stream) exciter(buf, p)
+```
+
+**Use when**: dull vocals, lifeless cymbals, mastering polish, restoring high-end after compression<br>
+**Not for**: spectral shaping (use a shelf/EQ from `audio-filter`) — exciter *adds* harmonics, not gain
+
+<!-- ![Exciter](plot/exciter.svg) -->
+
+
 ### Bitcrusher
 
 Sample-rate reduction (zero-order hold) + bit-depth quantization.
@@ -579,6 +617,25 @@ for (let [L, R] of stereoStream) panner(L, R, p)
 **Not for**: 3D spatial audio
 
 <!-- ![Panner](plot/panner.svg) -->
+
+
+### Auto-panner
+
+LFO-driven constant-power pan — signal sweeps between speakers periodically.
+
+**`rate`** LFO rate in Hz (default 0.5) · **`depth`** sweep depth 0–1 (default 1, full excursion) · **`fs`** sample rate
+
+```js
+import { autoPanner } from 'audio-effect/spatial'
+
+let p = { rate: 0.5, depth: 1, fs: 44100 }
+for (let [L, R] of stereoStream) autoPanner(L, R, p)
+```
+
+**Use when**: rhythmic stereo motion, ambient spatialization, auto-panning leads<br>
+**Not for**: static placement (use [panner](#panner))
+
+<!-- ![Auto-panner](plot/auto-panner.svg) -->
 
 
 ## Utility

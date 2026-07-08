@@ -7,10 +7,12 @@
   "main": "tremolo.js",
   "exports": {
     ".": "./tremolo.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "tremolo.js"
+    "tremolo.js",
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -34,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

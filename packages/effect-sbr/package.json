@@ -18,12 +18,15 @@
   "main": "sbr.js",
   "exports": {
     ".": "./sbr.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "sbr.js"
+    "sbr.js",
+    "audio-module.js"
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

@@ -18,12 +18,15 @@
   "main": "lofi.js",
   "exports": {
     ".": "./lofi.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "lofi.js"
+    "lofi.js",
+    "audio-module.js"
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

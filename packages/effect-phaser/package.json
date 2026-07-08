@@ -7,10 +7,12 @@
   "main": "phaser.js",
   "exports": {
     ".": "./phaser.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "phaser.js"
+    "phaser.js",
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -34,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

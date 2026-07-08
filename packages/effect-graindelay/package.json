@@ -18,12 +18,15 @@
   "main": "graindelay.js",
   "exports": {
     ".": "./graindelay.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "graindelay.js"
+    "graindelay.js",
+    "audio-module.js"
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

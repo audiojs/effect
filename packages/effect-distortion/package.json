@@ -7,10 +7,12 @@
   "main": "distortion.js",
   "exports": {
     ".": "./distortion.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "distortion.js"
+    "distortion.js",
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -34,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

@@ -7,10 +7,12 @@
   "main": "exciter.js",
   "exports": {
     ".": "./exciter.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "exciter.js"
+    "exciter.js",
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -34,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

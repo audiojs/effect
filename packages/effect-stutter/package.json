@@ -18,12 +18,15 @@
   "main": "stutter.js",
   "exports": {
     ".": "./stutter.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "stutter.js"
+    "stutter.js",
+    "audio-module.js"
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

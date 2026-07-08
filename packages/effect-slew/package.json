@@ -7,10 +7,12 @@
   "main": "slew-limiter.js",
   "exports": {
     ".": "./slew-limiter.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./audio-module": "./audio-module.js"
   },
   "files": [
-    "slew-limiter.js"
+    "slew-limiter.js",
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -34,5 +36,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "audio-module": "./audio-module.js"
 }

@@ -349,3 +349,88 @@ test('frequencyShifter — mix=0 is passthrough', () => {
 // Auto-panner
 // ═══════════════════════════════════════════════════════════════════════════
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Texture / bandwidth
+// ═══════════════════════════════════════════════════════════════════════════
+
+function goertzel (d, f, fs = 44100, from = 2048, to = d.length - 2048) {
+	let w = 2 * Math.PI * f / fs, cw = Math.cos(w), s1 = 0, s2 = 0
+	for (let i = from; i < to; i++) { let s0 = d[i] + 2 * cw * s1 - s2; s2 = s1; s1 = s0 }
+	return Math.sqrt(Math.max(0, s1 * s1 + s2 * s2 - 2 * cw * s1 * s2)) / (to - from)
+}
+
+test('graindelay — delayed grains appear, dry-only until delay time', () => {
+	let n = 44100, d = new Float64Array(n)
+	for (let i = 0; i < 4410; i++) d[i] = Math.sin(2 * Math.PI * 440 * i / 44100)
+	fx.grainDelay(d, { time: 0.25, mix: 0.5, feedback: 0, fs: 44100 })
+	let pre = 0, post = 0
+	for (let i = 5000; i < 10000; i++) pre = Math.max(pre, Math.abs(d[i]))
+	for (let i = 11500; i < 16000; i++) post = Math.max(post, Math.abs(d[i]))
+	ok(pre < 0.01, `silent between source and delay (${pre.toFixed(4)})`)
+	ok(post > 0.05, `grains land after 0.25 s (${post.toFixed(3)})`)
+})
+
+test('graindelay — pitch: +12 st grains read at 2× rate (octave up)', () => {
+	let n = 44100, d = new Float64Array(n)
+	for (let i = 0; i < 22050; i++) d[i] = 0.8 * Math.sin(2 * Math.PI * 440 * i / 44100)
+	fx.grainDelay(d, { time: 0.1, pitch: 12, spray: 0, jitter: 0, mix: 1, feedback: 0, fs: 44100 })
+	ok(goertzel(d, 880, 44100, 8820, 22050) > goertzel(d, 440, 44100, 8820, 22050) * 2, 'octave dominates')
+})
+
+test('stutter — slice repeats fill the interval', () => {
+	let n = 44100, d = new Float64Array(n)
+	// impulse train only inside the first slice (0..0.125 s)
+	for (let i = 0; i < 5512; i += 500) d[i] = 1
+	fx.stutter(d, { interval: 0.5, slice: 0.125, mix: 1, fs: 44100 })
+	let hits = 0
+	for (let i = 5513; i < 22050; i++) if (Math.abs(d[i]) > 0.5) hits++
+	ok(hits >= 20, `repeats present after capture (${hits} hits)`)
+})
+
+test('stutter — decay attenuates successive repeats', () => {
+	let n = 44100, d = new Float64Array(n)
+	for (let i = 0; i < 5512; i++) d[i] = Math.sin(2 * Math.PI * 440 * i / 44100)
+	fx.stutter(d, { interval: 1, slice: 0.125, decay: 0.5, mix: 1, fs: 44100 })
+	let r1 = 0, r3 = 0
+	for (let i = 5600; i < 10800; i++) r1 = Math.max(r1, Math.abs(d[i]))
+	for (let i = 16700; i < 21800; i++) r3 = Math.max(r3, Math.abs(d[i]))
+	ok(r3 < r1 * 0.5, `later repeats quieter (${r3.toFixed(3)} < ${r1.toFixed(3)})`)
+})
+
+test('lofi — bandwidth ceiling kills 12 kHz, keeps 500 Hz', () => {
+	let n = 44100
+	let d = new Float64Array(n)
+	for (let i = 0; i < n; i++) d[i] = 0.4 * (Math.sin(2 * Math.PI * 500 * i / 44100) + Math.sin(2 * Math.PI * 12000 * i / 44100))
+	fx.lofi(d, { lowpass: 3000, wow: 0, flutter: 0, noise: 0, crackle: 0, drive: 0, fs: 44100 })
+	ok(goertzel(d, 12000) < goertzel(d, 500) * 0.15, 'HF crushed, program kept')
+})
+
+test('lofi — wow modulation spreads a pure tone', () => {
+	let n = 88200, d = new Float64Array(n)
+	for (let i = 0; i < n; i++) d[i] = 0.5 * Math.sin(2 * Math.PI * 1000 * i / 44100)
+	let dry = goertzel(d, 1000)
+	fx.lofi(d, { wow: 1, flutter: 0, noise: 0, crackle: 0, drive: 0, lowpass: 20000, fs: 44100 })
+	ok(goertzel(d, 1000) < dry * 0.9, 'carrier smeared by pitch drift')
+	ok(d.every(isFinite))
+})
+
+test('subbass — generates low-mid harmonics from a 60 Hz sub', () => {
+	let n = 44100, d = new Float64Array(n)
+	for (let i = 0; i < n; i++) d[i] = 0.7 * Math.sin(2 * Math.PI * 60 * i / 44100)
+	let h2dry = goertzel(d, 120), h3dry = goertzel(d, 180)
+	fx.subbass(d, { freq: 80, amount: 0.8, drive: 0.7, fs: 44100 })
+	ok(goertzel(d, 120) > h2dry * 3 || goertzel(d, 180) > h3dry * 3, 'harmonic series appears')
+	ok(d.every(isFinite))
+})
+
+test('sbr — regenerates content above the cutoff', () => {
+	let n = 44100, d = new Float64Array(n)
+	// program dies at 4 kHz (simulated lossy ceiling): 3 kHz tone only
+	for (let i = 0; i < n; i++) d[i] = 0.6 * Math.sin(2 * Math.PI * 3000 * i / 44100)
+	let above = goertzel(d, 6000)
+	fx.sbr(d, { cutoff: 4000, amount: 0.8, drive: 0.7, fs: 44100 })
+	ok(goertzel(d, 6000) > above * 5 + 1e-6, 'harmonics land above cutoff')
+	almost(goertzel(d, 3000) / 0.3, 1, 0.15)  // program band substantially intact
+	ok(d.every(isFinite))
+})

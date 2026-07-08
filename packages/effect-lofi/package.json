@@ -1,10 +1,9 @@
 {
   "name": "@audio/effect-lofi",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Lo-fi character — wow/flutter, vinyl noise, crackle, bandwidth ceiling (RC-20 class)",
   "type": "module",
   "sideEffects": false,
-  "private": true,
   "keywords": [
     "audio",
     "dsp",
@@ -15,5 +14,16 @@
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
   "engines": {
     "node": ">=18"
+  },
+  "main": "lofi.js",
+  "exports": {
+    ".": "./lofi.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lofi.js"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

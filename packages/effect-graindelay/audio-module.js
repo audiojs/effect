@@ -27,7 +27,7 @@ export const graindelay = (ctx) => {
 	}
 }
 graindelay.channels = 'any'
-graindelay.tail = 100 // RT60 at feedback.max(0.9): ≈66 repeats × time.max(1.5s) ≈ 99s
+graindelay.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return (reps + 1) * params.time[0] } // RT60 from live feedback × live time
 graindelay.params = {
 	time:     { type: 'number', min: 0.02, max: 1.5, default: 0.25, unit: 's', flags: ['restart'] },
 	spray:    { type: 'number', min: 0, max: 0.1, default: 0.02, unit: 's', flags: ['restart'] },

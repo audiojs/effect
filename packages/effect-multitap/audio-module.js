@@ -22,7 +22,7 @@ export const multitap = (ctx) => {
 	}
 }
 multitap.channels = 'any'
-multitap.tail = 35 // RT60 at feedback.max(0.9): ≈66 repeats × longest fixed tap (0.5s) ≈ 33s
+multitap.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return (reps + 1) * 0.5 } // RT60 from live feedback × longest fixed tap (0.5s)
 multitap.params = {
 	feedback: { type: 'number', min: 0, max: 0.9, default: 0 },
 }

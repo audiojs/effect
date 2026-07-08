@@ -18,7 +18,7 @@ export const pingpong = (ctx) => {
 	}
 }
 pingpong.channels = 2
-pingpong.tail = 140 // RT60 at feedback.max(0.9): ≈66 repeats × time.max(2s) ≈ 132s
+pingpong.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return (reps + 1) * params.time[0] } // RT60 from live feedback × live time
 pingpong.params = {
 	time:     { type: 'number', min: 0.01, max: 2, default: 0.25, unit: 's', flags: ['restart'] },
 	feedback: { type: 'number', min: 0, max: 0.9, default: 0.4 },

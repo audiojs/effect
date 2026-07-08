@@ -21,7 +21,7 @@ export const flanger = (ctx) => {
 	}
 }
 flanger.channels = 'any'
-flanger.tail = 1.5 // RT60 at feedback.max(0.9): ln(1e-3)/ln(0.9) ≈ 66 repeats × delay.max(20ms) ≈ 1.3s
+flanger.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return Math.max(0.05, (reps + 1) * 0.02) } // RT60 from live feedback × delay.max(20ms)
 flanger.params = {
 	rate:     { type: 'number', min: 0.02, max: 5, default: 0.3, unit: 'Hz', curve: 'log' },
 	depth:    { type: 'number', min: 0, max: 1, default: 0.7 },

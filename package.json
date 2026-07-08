@@ -32,7 +32,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/audiojs/audio-effect.git"
+    "url": "git+https://github.com/audiojs/effect.git"
   },
   "devDependencies": {
     "digital-filter": "file:../../digital-filter"
@@ -48,9 +48,9 @@
     "node": ">=18"
   },
   "bugs": {
-    "url": "https://github.com/audiojs/audio-effect/issues"
+    "url": "https://github.com/audiojs/effect/issues"
   },
-  "homepage": "https://github.com/audiojs/audio-effect#readme",
+  "homepage": "https://github.com/audiojs/effect#readme",
   "main": "index.js",
   "dependencies": {
     "@audio/effect-phaser": "^1.0.0",

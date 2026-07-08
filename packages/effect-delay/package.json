@@ -8,11 +8,11 @@
   "exports": {
     ".": "./delay.js",
     "./package.json": "./package.json",
-    "./am": "./am.js"
+    "./audio-module": "./audio-module.js"
   },
   "files": [
     "delay.js",
-    "am.js"
+    "audio-module.js"
   ],
   "keywords": [
     "audio",
@@ -37,5 +37,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio-module": "./am.js"
+  "audio-module": "./audio-module.js"
 }

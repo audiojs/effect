@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-lofi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lo-fi character — wow/flutter, vinyl noise, crackle, bandwidth ceiling (RC-20 class)",
   "type": "module",
   "sideEffects": false,

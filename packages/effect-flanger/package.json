@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-flanger",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Flanger — modulated short delay with feedback",
   "type": "module",
   "sideEffects": false,

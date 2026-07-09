@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-bitcrusher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Bitcrusher — sample-rate reduction + bit-depth quantization",
   "type": "module",
   "sideEffects": false,

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-subbass",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Psychoacoustic bass enhancer — harmonic synthesis below cutoff (MaxxBass/RBass class)",
   "type": "module",
   "sideEffects": false,

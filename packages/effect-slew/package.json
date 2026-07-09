@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-slew",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Rate-of-change limiter",
   "type": "module",
   "sideEffects": false,

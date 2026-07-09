@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the lofi atom; buffer size is fs-only (not param-
+// atom manifest — wraps the lofi atom; buffer size is fs-only (not param-
 // dependent, safe at any wow/flutter setting), so every param stays live. Each channel
 // gets a distinct noise seed so stereo material isn't crushed to a mono-identical
 // hiss/crackle bed.

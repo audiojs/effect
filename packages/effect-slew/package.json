@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-slew",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Rate-of-change limiter",
   "type": "module",
   "sideEffects": false,
@@ -8,11 +8,11 @@
   "exports": {
     ".": "./slew-limiter.js",
     "./package.json": "./package.json",
-    "./audio-module": "./audio-module.js"
+    "./atom": "./atom.js"
   },
   "files": [
     "slew-limiter.js",
-    "audio-module.js"
+    "atom.js"
   ],
   "keywords": [
     "audio",
@@ -37,5 +37,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio-module": "./audio-module.js"
+  "atom": "./atom.js"
 }

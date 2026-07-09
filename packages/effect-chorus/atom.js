@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the chorus atom; state rides per-channel params objects.
+// atom manifest — wraps the chorus atom; state rides per-channel params objects.
 // `delay`/`voices` size the buffer at construction (flags: restart — voices also sidesteps
 // a kernel gap: _phases isn't resized when voices grows without delay also growing);
 // rate/depth are live.

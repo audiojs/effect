@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the ping-pong atom. Inherently stereo: the kernel
+// atom manifest — wraps the ping-pong atom. Inherently stereo: the kernel
 // cross-feeds left/right delay lines, so this declares a fixed 2-channel bus and holds
 // one shared state object (not per-channel). `time` sizes both delay lines at
 // construction (flags: restart); feedback/mix are live.

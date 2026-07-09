@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the slew-limiter atom; purely reactive rate-of-change
+// atom manifest — wraps the slew-limiter atom; purely reactive rate-of-change
 // clamp, no sizing params — every param stays live, per-channel state is just the
 // running output sample.
 

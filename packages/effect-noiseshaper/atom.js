@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the noise-shaping atom; single-sample error-feedback
+// atom manifest — wraps the noise-shaping atom; single-sample error-feedback
 // loop, no sizing params — every param stays live, per-channel state is just the
 // running feedback error term.
 

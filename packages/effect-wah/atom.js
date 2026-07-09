@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the wah-wah atom; envelope-free swept/static bandpass,
+// atom manifest — wraps the wah-wah atom; envelope-free swept/static bandpass,
 // no sizing params — every param stays live. `mode` picks LFO-swept ('auto') vs a
 // fixed pedal position ('manual', freq pinned at fc).
 

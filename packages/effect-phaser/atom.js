@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the phaser atom; state rides per-channel params objects.
+// atom manifest — wraps the phaser atom; state rides per-channel params objects.
 // `stages` sizes the allpass chain at construction (flags: restart — the kernel never
 // re-checks _ap's length against a new stage count, so a live increase would read past
 // the array); rate/depth/feedback/fc are live.

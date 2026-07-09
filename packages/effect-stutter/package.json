@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-stutter",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Stutter / beat-repeat — sliced buffer retrigger (Ableton Beat Repeat class)",
   "type": "module",
   "sideEffects": false,
@@ -19,14 +19,14 @@
   "exports": {
     ".": "./stutter.js",
     "./package.json": "./package.json",
-    "./audio-module": "./audio-module.js"
+    "./atom": "./atom.js"
   },
   "files": [
     "stutter.js",
-    "audio-module.js"
+    "atom.js"
   ],
   "publishConfig": {
     "access": "public"
   },
-  "audio-module": "./audio-module.js"
+  "atom": "./atom.js"
 }

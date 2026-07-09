@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the subbass atom; SVF filter state, no sizing params —
+// atom manifest — wraps the subbass atom; SVF filter state, no sizing params —
 // every param stays live, per-channel state is just the running filter integrators.
 
 import subbassFn from './subbass.js'

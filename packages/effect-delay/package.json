@@ -1,18 +1,18 @@
 {
   "name": "@audio/effect-delay",
-  "version": "1.0.0",
-  "description": "Simple delay \u2014 mix of dry signal with delayed copy",
+  "version": "1.0.1",
+  "description": "Simple delay — mix of dry signal with delayed copy",
   "type": "module",
   "sideEffects": false,
   "main": "delay.js",
   "exports": {
     ".": "./delay.js",
     "./package.json": "./package.json",
-    "./audio-module": "./audio-module.js"
+    "./atom": "./atom.js"
   },
   "files": [
     "delay.js",
-    "audio-module.js"
+    "atom.js"
   ],
   "keywords": [
     "audio",
@@ -37,5 +37,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio-module": "./audio-module.js"
+  "atom": "./atom.js"
 }

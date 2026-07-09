@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the ring-mod atom; pure oscillator multiply, no sizing
+// atom manifest — wraps the ring-mod atom; pure oscillator multiply, no sizing
 // params — every param stays live, per-channel state is just the running carrier phase.
 
 import ringModFn from './ring-mod.js'

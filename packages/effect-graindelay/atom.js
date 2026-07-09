@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the graindelay atom; state rides per-channel params
+// atom manifest — wraps the graindelay atom; state rides per-channel params
 // objects. time/spray/pitch/jitter/grain all feed the buffer-size calc (flags: restart
 // — a live change reallocates and silently drops the buffered history, an audible
 // glitch); feedback/mix are live. Each channel gets a distinct grain-scatter seed.

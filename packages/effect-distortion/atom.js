@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the distortion waveshaper per @audio/module CONTRACT.
+// atom manifest — wraps the distortion waveshaper per @audio/atom CONTRACT.
 // Stateless per-sample transfer curve — drive/type/mix are live, no per-channel state
 // (matches @audio/dynamics-softclip's stateless pattern).
 

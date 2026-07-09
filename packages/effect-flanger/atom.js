@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the flanger atom; state rides per-channel params objects.
+// atom manifest — wraps the flanger atom; state rides per-channel params objects.
 // `delay` sizes the buffer at construction (flags: restart); rate/depth/feedback are live.
 
 import flangerFn from './flanger.js'

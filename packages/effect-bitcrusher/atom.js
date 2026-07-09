@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the bitcrusher atom; stateful hold/phase but no sizing
+// atom manifest — wraps the bitcrusher atom; stateful hold/phase but no sizing
 // params — every param stays live, per-channel state is just the held sample + phase.
 
 import bitcrusherFn from './bitcrusher.js'

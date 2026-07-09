@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the vibrato atom; state rides per-channel params objects.
+// atom manifest — wraps the vibrato atom; state rides per-channel params objects.
 // `depth` (modulation excursion, seconds) sizes the delay buffer at construction
 // (flags: restart); rate is live.
 

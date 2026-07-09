@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the stutter atom; state rides per-channel params
+// atom manifest — wraps the stutter atom; state rides per-channel params
 // objects. interval/slice size the capture buffer at construction (flags: restart);
 // decay/mix are live.
 

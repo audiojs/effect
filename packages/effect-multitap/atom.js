@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the multitap atom. `taps` is an array-of-objects param
+// atom manifest — wraps the multitap atom. `taps` is an array-of-objects param
 // on the kernel — array values can't cross the module param boundary (number/enum/bool
 // only), so the tap layout is fixed at the kernel's own default (0.25s/0.5 gain,
 // 0.5s/0.3 gain) and only `feedback` is exposed live.

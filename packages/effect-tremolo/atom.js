@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the tremolo atom; purely per-sample LFO, no sizing
+// atom manifest — wraps the tremolo atom; purely per-sample LFO, no sizing
 // params — every param stays live, per-channel state is just the running LFO phase.
 
 import tremoloFn from './tremolo.js'

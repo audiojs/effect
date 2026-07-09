@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the delay atom; state rides per-channel params objects.
+// atom manifest — wraps the delay atom; state rides per-channel params objects.
 // `time` sizes the delay line at construction (flags: restart); feedback/mix are live.
 
 import delayFn from './delay.js'

@@ -1,9 +1,9 @@
-// audio-module manifest — wraps the sbr atom; SVF filter state, no sizing params —
+// atom manifest — wraps the exciter atom; SVF filter state, no sizing params —
 // every param stays live, per-channel state is just the running filter integrators.
 
-import sbrFn from './sbr.js'
+import exciterFn from './exciter.js'
 
-export const sbr = (ctx) => {
+export const exciter = (ctx) => {
 	const chP = []
 	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate })
 	return (inputs, outputs, params) => {
@@ -11,17 +11,17 @@ export const sbr = (ctx) => {
 		if (!inp || !inp.length) return
 		for (let c = 0; c < inp.length; c++) {
 			const p = chP[c]
-			p.cutoff = params.cutoff[0]
-			p.amount = params.amount[0]
+			p.freq = params.freq[0]
 			p.drive = params.drive[0]
+			p.amount = params.amount[0]
 			out[c].set(inp[c])
-			sbrFn(out[c], p)
+			exciterFn(out[c], p)
 		}
 	}
 }
-sbr.channels = 'any'
-sbr.params = {
-	cutoff: { type: 'number', min: 2000, max: 16000, default: 8000, unit: 'Hz', curve: 'log' },
-	amount: { type: 'number', min: 0, max: 1, default: 0.5 },
+exciter.channels = 'any'
+exciter.params = {
+	freq:   { type: 'number', min: 500, max: 8000, default: 3000, unit: 'Hz', curve: 'log' },
 	drive:  { type: 'number', min: 0, max: 1, default: 0.5 },
+	amount: { type: 'number', min: 0, max: 1, default: 0.5 },
 }

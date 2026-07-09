@@ -1,4 +1,4 @@
-// audio-module manifest — wraps the auto-wah atom; envelope-driven filter, no sizing
+// atom manifest — wraps the auto-wah atom; envelope-driven filter, no sizing
 // params — every param stays live, per-channel state is just the running filter/envelope.
 
 import autoWahFn from './auto-wah.js'

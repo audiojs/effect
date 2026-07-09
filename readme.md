@@ -37,13 +37,16 @@ npm install @audio/effect
 // import everything
 import * as fx from '@audio/effect'
 
-// import by category
-import { phaser, flanger, chorus, wah, autoWah, ringMod, frequencyShifter, pitchShifter } from '@audio/effect/modulation'
+// pick what you need
+import { phaser, flanger, chorus, wah, autoWah, ringMod, frequencyShifter } from '@audio/effect'
+import { delay, multitap, pingPong }                            from '@audio/effect'
+import { distortion, exciter, bitcrusher }                      from '@audio/effect'
+import { gain, mixer, slewLimiter, noiseShaping }               from '@audio/effect'
+
+// sibling families
 import { compressor, limiter, gate, envelope, expander }        from '@audio/dynamics'
-import { delay, multitap, pingPong, reverb }                    from '@audio/effect/delay'
-import { distortion, exciter, bitcrusher }                      from '@audio/effect/distortion'
 import { stereoWidener, haas, panner, autoPanner }              from '@audio/spatial'
-import { gain, mixer, slewLimiter, noiseShaping }               from '@audio/effect/utility'
+import { freeverb, dattorro, convolve }                         from '@audio/reverb'
 ```
 
 
@@ -82,7 +85,7 @@ Cascade of swept allpass filters creating moving notches and peaks.
 **`rate`** LFO rate in Hz (default 0.5) · **`depth`** sweep depth 0–1 (default 0.7) · **`stages`** allpass stages (default 4) · **`feedback`** 0–1 (default 0.5) · **`fc`** center frequency Hz (default 1000) · **`fs`** sample rate
 
 ```js
-import { phaser } from '@audio/effect/modulation'
+import { phaser } from '@audio/effect'
 
 let p = { rate: 0.5, depth: 0.7, stages: 4, feedback: 0.5, fc: 1000, fs: 44100 }
 for (let buf of stream) phaser(buf, p)
@@ -101,7 +104,7 @@ Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 **`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in ms (default 3) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { flanger } from '@audio/effect/modulation'
+import { flanger } from '@audio/effect'
 
 let p = { rate: 0.3, depth: 0.7, delay: 3, feedback: 0.5, fs: 44100 }
 for (let buf of stream) flanger(buf, p)
@@ -120,7 +123,7 @@ Multiple detuned delay voices layered over dry signal — ensemble thickening.
 **`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in ms (default 20) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
 
 ```js
-import { chorus } from '@audio/effect/modulation'
+import { chorus } from '@audio/effect'
 
 let p = { rate: 1.5, depth: 0.5, delay: 20, voices: 3, fs: 44100 }
 for (let buf of stream) chorus(buf, p)
@@ -139,7 +142,7 @@ Swept resonant bandpass filter — auto (LFO) or fixed frequency mode.
 **`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth 0–1 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`fs`** sample rate
 
 ```js
-import { wah } from '@audio/effect/modulation'
+import { wah } from '@audio/effect'
 
 let p = { rate: 1.5, depth: 0.8, fc: 1000, Q: 5, fs: 44100 }
 for (let buf of stream) wah(buf, p)
@@ -158,7 +161,7 @@ Amplitude modulation via LFO — periodic volume pulsing.
 **`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { tremolo } from '@audio/effect/modulation'
+import { tremolo } from '@audio/effect'
 
 let p = { rate: 5, depth: 0.7, fs: 44100 }
 for (let buf of stream) tremolo(buf, p)
@@ -177,7 +180,7 @@ Pitch modulation via modulated delay line — periodic pitch wobble.
 **`rate`** LFO rate in Hz (default 5) · **`depth`** delay modulation depth in seconds (default 0.003) · **`fs`** sample rate
 
 ```js
-import { vibrato } from '@audio/effect/modulation'
+import { vibrato } from '@audio/effect'
 
 let p = { rate: 5, depth: 0.003, fs: 44100 }
 for (let buf of stream) vibrato(buf, p)
@@ -196,7 +199,7 @@ Multiplies signal by a carrier oscillator — produces sum and difference freque
 **`fc`** carrier frequency Hz (default 440) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
 
 ```js
-import { ringMod } from '@audio/effect/modulation'
+import { ringMod } from '@audio/effect'
 
 let p = { fc: 300, mix: 1, fs: 44100 }
 for (let buf of stream) ringMod(buf, p)
@@ -215,7 +218,7 @@ Single-sideband frequency shift via Hilbert transform. Every frequency moves by 
 **`shift`** shift in Hz (default 100 · positive = up, negative = down) · **`mix`** wet/dry 0–1 (default 1) · **`taps`** Hilbert FIR length, must be odd (default 65) · **`fs`** sample rate
 
 ```js
-import { frequencyShifter } from '@audio/effect/modulation'
+import { frequencyShifter } from '@audio/effect'
 
 let p = { shift: 200, fs: 44100 }
 for (let buf of stream) frequencyShifter(buf, p)
@@ -229,21 +232,13 @@ for (let buf of stream) frequencyShifter(buf, p)
 
 ### Pitch shifter
 
-Granular OLA pitch shifting via varispeed read with crossfade grain boundaries.
-
-**`shift`** pitch ratio (default 1.5 · 2 = +octave · 0.5 = −octave) · **`grain`** grain size in samples (default 2048) · **`fs`** sample rate
+Moved to [`@audio/shift`](https://github.com/audiojs/shift) — 15 algorithms from granular to phase-vocoder to PSOLA:
 
 ```js
-import { pitchShifter } from '@audio/effect/modulation'
+import { granular } from '@audio/shift'
 
-let p = { shift: 1.5, grain: 2048, fs: 44100 }
-for (let buf of stream) pitchShifter(buf, p)
+let out = granular(buf, { ratio: 1.5 })
 ```
-
-**Use when**: harmonizer, octave up/down, pitch correction<br>
-**Not for**: high-quality transposition (use phase vocoder for that)
-
-<!-- ![Pitch shifter](plot/pitch-shifter.svg) -->
 
 
 ### Auto-wah
@@ -253,7 +248,7 @@ Envelope follower drives a resonant bandpass filter — signal level controls th
 **`base`** minimum cutoff Hz (default 300) · **`range`** sweep range Hz (default 3000) · **`Q`** resonance (default 5) · **`attack`** envelope attack seconds (default 0.002) · **`release`** envelope release seconds (default 0.1) · **`sens`** input sensitivity multiplier (default 2) · **`fs`** sample rate
 
 ```js
-import { autoWah } from '@audio/effect/modulation'
+import { autoWah } from '@audio/effect'
 
 let p = { base: 300, range: 3000, Q: 5, sens: 2, fs: 44100 }
 for (let buf of stream) autoWah(buf, p)
@@ -403,7 +398,7 @@ Simple delay — dry signal mixed with delayed copy and optional feedback.
 **`time`** delay time in seconds (default 0.25) · **`feedback`** echo decay 0–1 (default 0.3) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { delay } from '@audio/effect/delay'
+import { delay } from '@audio/effect'
 
 let p = { time: 0.25, feedback: 0.4, mix: 0.5, fs: 44100 }
 for (let buf of stream) delay(buf, p)
@@ -422,7 +417,7 @@ Multiple independent delay taps at different times with individual gains.
 **`taps`** array of `{ time, gain }` objects · **`fs`** sample rate
 
 ```js
-import { multitap } from '@audio/effect/delay'
+import { multitap } from '@audio/effect'
 
 let p = {
   taps: [{ time: 0.1, gain: 0.6 }, { time: 0.25, gain: 0.4 }, { time: 0.4, gain: 0.2 }],
@@ -444,7 +439,7 @@ Cross-fed stereo delay — left echo bounces to right, right to left.
 **`time`** delay time in seconds (default 0.25) · **`feedback`** 0–1 (default 0.3) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { pingPong } from '@audio/effect/delay'
+import { pingPong } from '@audio/effect'
 
 let p = { time: 0.15, feedback: 0.5, mix: 0.5, fs: 44100 }
 for (let [L, R] of stereoStream) pingPong(L, R, p)
@@ -458,22 +453,13 @@ for (let [L, R] of stereoStream) pingPong(L, R, p)
 
 ### Reverb
 
-Schroeder reverb — 4 parallel feedback comb filters with LP damping, 2 series allpass diffusers.
-
-**`decay`** reverb time 0–1 (default 0.84) · **`damping`** high-frequency rolloff 0–1 (default 0.5) · **`mix`** wet/dry 0–1 (default 0.3) · **`fs`** sample rate
+Promoted to [`@audio/reverb`](https://github.com/audiojs/reverb) — Schroeder, Freeverb, Dattorro, convolution, FDN, spring, shimmer:
 
 ```js
-import { reverb } from '@audio/effect/delay'
+import { freeverb } from '@audio/reverb'
 
-let p = { decay: 0.84, damping: 0.5, mix: 0.3, fs: 44100 }
-for (let buf of stream) reverb(buf, p)
+let out = freeverb(buf, { decay: 0.84, damping: 0.5, mix: 0.3, fs: 44100 })
 ```
-
-**Implementation**: 4 parallel comb delays (1277–1523 samples at 44100 Hz), LP filter on feedback path, 2 Schroeder allpass stages (277, 349 samples)<br>
-**Use when**: room ambience, plate reverb character, spatial depth<br>
-**Not for**: convolution reverb accuracy (use an IR-based approach for that)
-
-<!-- ![Reverb](plot/reverb.svg) -->
 
 
 ## Distortion
@@ -487,7 +473,7 @@ Four waveshaping types: cubic soft clip, hard clip, tanh saturation, and wavefol
 **`drive`** distortion amount 0–1 (default 0.5, maps to 1–10× input gain) · **`type`** `'soft'` | `'hard'` | `'tanh'` | `'foldback'` (default `'soft'`) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
 
 ```js
-import { distortion } from '@audio/effect/distortion'
+import { distortion } from '@audio/effect'
 
 // Soft saturation
 let p = { drive: 0.6, type: 'soft', fs: 44100 }
@@ -523,7 +509,7 @@ Aphex-style aural exciter. Extracts the high band via SVF highpass, runs it thro
 **`freq`** highpass cutoff Hz (default 3000) · **`drive`** saturation amount 0–1 (default 0.5, maps to 1–10× gain) · **`amount`** mix-in level 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { exciter } from '@audio/effect/distortion'
+import { exciter } from '@audio/effect'
 
 let p = { freq: 4000, drive: 0.6, amount: 0.4, fs: 44100 }
 for (let buf of stream) exciter(buf, p)
@@ -542,7 +528,7 @@ Sample-rate reduction (zero-order hold) + bit-depth quantization.
 **`bits`** target bit depth 1–24 (default 8) · **`rate`** sample rate ratio 0–1 (default 0.25, quarter rate) · **`fs`** sample rate
 
 ```js
-import { bitcrusher } from '@audio/effect/distortion'
+import { bitcrusher } from '@audio/effect'
 
 // 8-bit, quarter sample rate (lo-fi)
 let p = { bits: 8, rate: 0.25, fs: 44100 }
@@ -649,7 +635,7 @@ Simple level adjustment in decibels.
 **`dB`** gain in dB (default 0)
 
 ```js
-import { gain } from '@audio/effect/utility'
+import { gain } from '@audio/effect'
 
 for (let buf of stream) gain(buf, { dB: -6 })
 ```
@@ -664,7 +650,7 @@ Sums an array of buffers with individual gain multipliers.
 **`channels`** array of `{ buffer, gain }` objects
 
 ```js
-import { mixer } from '@audio/effect/utility'
+import { mixer } from '@audio/effect'
 
 let out = mixer([
   { buffer: drums,  gain: 0.8 },
@@ -683,7 +669,7 @@ Clips the derivative — limits how fast the signal can change.
 **`rise`** maximum rise rate in units/second (default 1000) · **`fall`** maximum fall rate (default 1000) · **`fs`** sample rate
 
 ```js
-import { slewLimiter } from '@audio/effect/utility'
+import { slewLimiter } from '@audio/effect'
 
 let p = { rise: 5000, fall: 5000, fs: 44100 }
 for (let buf of stream) slewLimiter(buf, p)
@@ -702,7 +688,7 @@ Error-feedback quantization — shapes quantization noise out of the audible ban
 **`bits`** target bit depth (default 16)
 
 ```js
-import { noiseShaping } from '@audio/effect/utility'
+import { noiseShaping } from '@audio/effect'
 
 for (let buf of stream) noiseShaping(buf, { bits: 16 })
 ```

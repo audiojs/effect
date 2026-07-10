@@ -5,7 +5,7 @@ Canonical audio effect implementations.
 <table><tr><td valign="top">
 
 **[Modulation](#modulation)**<br>
-<sub>[Phaser](#phaser) · [Flanger](#flanger) · [Chorus](#chorus) · [Wah-wah](#wah-wah) · [Tremolo](#tremolo) · [Vibrato](#vibrato) · [Ring mod](#ring-mod) · [Frequency shifter](#frequency-shifter) · [Pitch shifter](#pitch-shifter) · [Auto-wah](#auto-wah)</sub>
+<sub>[Phaser](#phaser) · [Flanger](#flanger) · [Chorus](#chorus) · [Wah-wah](#wah-wah) · [Tremolo](#tremolo) · [Vibrato](#vibrato) · [Rotary speaker](#rotary-speaker) · [Ring mod](#ring-mod) · [Frequency shifter](#frequency-shifter) · [Pitch shifter](#pitch-shifter) · [Auto-wah](#auto-wah)</sub>
 
 **[Dynamics](#dynamics)**<br>
 <sub>[Compressor](#compressor) · [Limiter](#limiter) · [Noise gate](#noise-gate) · [Envelope follower](#envelope-follower) · [Transient shaper](#transient-shaper) · [Expander](#expander)</sub>
@@ -22,7 +22,7 @@ Canonical audio effect implementations.
 <sub>[Stereo widener](#stereo-widener) · [Haas effect](#haas-effect) · [Panner](#panner) · [Auto-panner](#auto-panner)</sub>
 
 **[Utility](#utility)**<br>
-<sub>[Gain](#gain) · [Mixer](#mixer) · [Slew limiter](#slew-limiter) · [Noise shaping](#noise-shaping)</sub>
+<sub>[Gain](#gain) · [Mixer](#mixer) · [Slew limiter](#slew-limiter) · [Noise shaping](#noise-shaping) · [Tape stop](#tape-stop)</sub>
 
 </td></tr></table>
 
@@ -190,6 +190,29 @@ for (let buf of stream) vibrato(buf, p)
 **Not for**: amplitude variation (use tremolo)
 
 <!-- ![Vibrato](plot/vibrato.svg) -->
+
+
+### Rotary speaker
+
+Leslie cabinet simulation — a treble horn and bass drum spin at independent, inertia-limited rates below a crossover split, each producing Doppler pitch modulation and directivity amplitude modulation as they turn past two virtual mics. Mono in, stereo out.
+
+**`hornSpeed`**/**`drumSpeed`** rotor rates in Hz (default 0.8/0.7 chorale · 6.7/5.9 tremolo · 0/0 off) · **`crossover`** horn/drum split in Hz (default 800) · **`depth`** modulation intensity 0–1 (default 1) · **`hornInertia`**/**`drumInertia`** spin-up/down time constants in seconds (default 0.6/2.5 — the heavier drum lags the horn) · **`micSpread`** angle between the two virtual mics in radians (default π/2) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
+
+```js
+import { rotary } from '@audio/effect'
+
+// mono in, stereo out: pre-fill both channels with the same dry signal
+let left = Float64Array.from(mono), right = Float64Array.from(mono)
+let p = { hornSpeed: 6.7, drumSpeed: 5.9, fs: 44100 }
+rotary(left, right, p)   // left, right now hold the two virtual-mic outputs
+```
+
+Switching `hornSpeed`/`drumSpeed` mid-stream glides through the inertia model instead of snapping — the classic chorale↔tremolo swell.
+
+**Use when**: organ/guitar Leslie emulation, spinning-speaker swells<br>
+**Not for**: plain stereo chorus (use chorus) or static stereo widening (use `@audio/spatial`)
+
+<!-- ![Rotary speaker](plot/rotary-speaker.svg) -->
 
 
 ### Ring mod
@@ -697,3 +720,21 @@ for (let buf of stream) noiseShaping(buf, { bits: 16 })
 **Not for**: audio compression (unrelated to lossy codecs)
 
 <!-- ![Noise shaping](plot/noise-shaping.svg) -->
+
+
+### Tape stop
+
+Variable-rate playback with a decelerating (or accelerating) read pointer — turntable power-off / tape-deck stop, and the reverse spin-up. Whole-buffer effect: needs the full signal in one call, not a per-block stream.
+
+**`at`** when the stop/start begins, in seconds (default 0) · **`time`** ramp duration in seconds (default 1) · **`curve`** speed-profile exponent — 1 = physical constant-torque linear decay, >1 = faster initial drop, <1 = held then dropping (default 1) · **`direction`** `'stop'` or `'start'` (default `'stop'`) · **`flutter`** 0–1 random rate wobble during the ramp (default 0)
+
+```js
+import { tapeStop } from '@audio/effect'
+
+tapeStop(buf, { at: 2, time: 1.5, direction: 'stop', fs: 44100 })
+```
+
+**Use when**: DJ/turntable power-off, tape-deck stop/start, transition sweeps<br>
+**Not for**: continuous pitch modulation (use vibrato) or tempo-locked time-stretch
+
+<!-- ![Tape stop](plot/tape-stop.svg) -->

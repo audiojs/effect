@@ -1,5 +1,6 @@
 import test from 'node:test'
 import { strict as assert } from 'node:assert'
+import { bandpass as biquadBandpass, process as biquadProcess } from '@audio/biquad'
 
 import * as fx from './index.js'
 
@@ -74,6 +75,145 @@ test('vibrato — modulates pitch', () => {
 	fx.vibrato(data, { rate: 5, depth: 0.003, fs: 44100 })
 	ok(data.some((x, i) => Math.abs(x - orig[i]) > 0.01), 'vibrato modifies signal')
 	ok(data.every(isFinite), 'no NaN/Inf')
+})
+
+// ── Rotary speaker — Leslie: crossover-split horn/drum rotors, each producing Doppler
+// (FM via modulated delay) + directivity AM. Kernel is (left, right, params): mono-in
+// is expressed by pre-filling both channels with the same dry signal (pingpong shape).
+
+function rotaryStereo (mono, params) {
+	let left = Float64Array.from(mono), right = Float64Array.from(mono)
+	fx.rotary(left, right, params)
+	return [left, right]
+}
+function envelope (d, fs, cutoff = 20) {
+	let out = new Float64Array(d.length), a = 1 - Math.exp(-2 * Math.PI * cutoff / fs), y = 0
+	for (let i = 0; i < d.length; i++) { y += a * (Math.abs(d[i]) - y); out[i] = y }
+	return out
+}
+function demean (d, from, to) {
+	let m = 0
+	for (let i = from; i < to; i++) m += d[i]
+	m /= (to - from)
+	let out = new Float64Array(d.length)
+	for (let i = from; i < to; i++) out[i] = d[i] - m
+	return out
+}
+// coarse spectral peak via Goertzel scan — sufficient resolution for LFO-rate (<15 Hz) reads
+function peakFreq (d, fs, from, to, fmin = 0.2, fmax = 12, step = 0.02) {
+	let best = fmin, bestE = -1
+	for (let f = fmin; f <= fmax; f += step) {
+		let e = goertzel(d, f, fs, from, to)
+		if (e > bestE) { bestE = e; best = f }
+	}
+	return best
+}
+function rms (d, from = 0, to = d.length) {
+	let s = 0
+	for (let i = from; i < to; i++) s += d[i] * d[i]
+	return Math.sqrt(s / (to - from))
+}
+
+test('rotary — Doppler sidebands appear at the horn rotor rate', () => {
+	let fs = 44100, N = 5 * fs
+	let mono = sine(3000, N, fs)
+	let [left] = rotaryStereo(mono, { fs, hornSpeed: 6.7, drumSpeed: 5.9, crossover: 800, depth: 1 })
+	let winN = 65536, from = N - winN, to = N // tail window — past any startup transient
+	let lo = goertzel(left, 3000 - 6.7, fs, from, to)
+	let hi = goertzel(left, 3000 + 6.7, fs, from, to)
+	let floorRef = goertzel(left, 3000 + 50, fs, from, to)
+	ok(20 * Math.log10(lo / floorRef) >= 20, `low sideband ${(20 * Math.log10(lo / floorRef)).toFixed(1)} dB above floor`)
+	ok(20 * Math.log10(hi / floorRef) >= 20, `high sideband ${(20 * Math.log10(hi / floorRef)).toFixed(1)} dB above floor`)
+})
+
+test('rotary — horn and drum rotors modulate at independent, crossover-routed rates', () => {
+	let fs = 44100, N = 5 * fs
+	let mono = new Float64Array(N)
+	for (let i = 0; i < N; i++) mono[i] = 0.5 * Math.sin(2 * Math.PI * 150 * i / fs) + 0.5 * Math.sin(2 * Math.PI * 3000 * i / fs)
+	// fast inertia isolates crossover-routing structure from the glide behavior (tested separately)
+	let [left] = rotaryStereo(mono, { fs, hornSpeed: 8, drumSpeed: 2, crossover: 800, depth: 1, hornInertia: 0.05, drumInertia: 0.05 })
+
+	let lowBand = Float64Array.from(left); biquadProcess(lowBand, biquadBandpass(150, 5, fs))
+	let hiBand = Float64Array.from(left); biquadProcess(hiBand, biquadBandpass(3000, 5, fs))
+	let from = Math.round(0.5 * fs), to = N
+	let lowPeak = peakFreq(demean(envelope(lowBand, fs, 20), from, to), fs, from, to)
+	let hiPeak = peakFreq(demean(envelope(hiBand, fs, 20), from, to), fs, from, to)
+	ok(Math.abs(lowPeak - 2) <= 0.5, `150 Hz tone envelope modulates at drum rate: ${lowPeak.toFixed(2)} Hz (expect ~2)`)
+	ok(Math.abs(hiPeak - 8) <= 0.5, `3 kHz tone envelope modulates at horn rate: ${hiPeak.toFixed(2)} Hz (expect ~8)`)
+})
+
+test('rotary — AM depth grows monotonically with depth', () => {
+	let fs = 44100, N = 2 * fs
+	let mono = sine(3000, N, fs)
+	let from = Math.round(0.3 * fs), to = N
+	let ratios = [0.2, 0.6, 1.0].map(depth => {
+		let [left] = rotaryStereo(mono, { fs, hornSpeed: 6.7, drumSpeed: 5.9, depth, hornInertia: 0.02, crossover: 800 })
+		let env = envelope(left, fs, 30)
+		let mn = Infinity, mx = -Infinity
+		for (let i = from; i < to; i++) { if (env[i] < mn) mn = env[i]; if (env[i] > mx) mx = env[i] }
+		return mx / mn
+	})
+	ok(ratios[0] < ratios[1] && ratios[1] < ratios[2], `peak/trough grows with depth: ${ratios.map(r => r.toFixed(2))}`)
+})
+
+test('rotary — speed change glides through the inertia model (chorale → tremolo)', () => {
+	let fs = 44100, T = 3 * fs
+	let p = { fs, hornSpeed: 0.8, drumSpeed: 0.7, depth: 1, crossover: 800 } // chorale — let it settle
+	fx.rotary(Float64Array.from(sine(3000, T, fs)), Float64Array.from(sine(3000, T, fs)), p)
+
+	p.hornSpeed = 6.7; p.drumSpeed = 5.9 // switch to tremolo mid-stream — state (incl. rotor rate) persists on p
+	let mono2 = sine(3000, T, fs)
+	let [left2] = rotaryStereo(mono2, p)
+
+	let env = envelope(left2, fs, 40)
+	let earlyFrom = 0, earlyTo = Math.round(0.4 * fs)
+	let lateFrom = T - fs, lateTo = T
+	let early = peakFreq(demean(env, earlyFrom, earlyTo), fs, earlyFrom, earlyTo)
+	let late = peakFreq(demean(env, lateFrom, lateTo), fs, lateFrom, lateTo)
+	ok(late >= 2 * early, `late rate (${late}) ≥ 2× early rate (${early})`)
+	ok(early >= 0.8 && early <= 6.7, `early rate ${early} within [0.8, 6.7]`)
+	ok(late >= 0.8 && late <= 6.7, `late rate ${late} within [0.8, 6.7]`)
+})
+
+test('rotary — L/R mics decorrelate without gross mono cancellation', () => {
+	let fs = 44100, N = 2 * fs
+	let mono = new Float64Array(N)
+	for (let i = 0; i < N; i++) mono[i] = 0.6 * Math.sin(2 * Math.PI * 3000 * i / fs) + 0.3 * Math.sin(2 * Math.PI * 300 * i / fs)
+	let [left, right] = rotaryStereo(mono, { fs, hornSpeed: 6.7, drumSpeed: 5.9, depth: 1, crossover: 800 })
+	let from = Math.round(0.3 * fs)
+	let diff = new Float64Array(N), sum = new Float64Array(N)
+	for (let i = 0; i < N; i++) { diff[i] = left[i] - right[i]; sum[i] = left[i] + right[i] }
+	let rmsL = rms(left, from), rmsDiff = rms(diff, from), rmsSum = rms(sum, from)
+	ok(20 * Math.log10(rmsDiff / rmsL) >= -20, `L−R decorrelation: ${(20 * Math.log10(rmsDiff / rmsL)).toFixed(1)} dB`)
+	ok(Math.abs(20 * Math.log10(rmsSum / (2 * rmsL))) <= 3, `L+R vs 2×L: ${(20 * Math.log10(rmsSum / (2 * rmsL))).toFixed(2)} dB`)
+})
+
+test('rotary — mix=0 is exact bypass (zero latency)', () => {
+	let fs = 44100, N = 4096
+	let mono = sine(440, N, fs)
+	let [left, right] = rotaryStereo(mono, { fs, mix: 0, hornSpeed: 6.7, drumSpeed: 5.9 })
+	let maxErr = 0
+	for (let i = 0; i < N; i++) maxErr = Math.max(maxErr, Math.abs(left[i] - mono[i]), Math.abs(right[i] - mono[i]))
+	ok(maxErr < 1e-10, `mix=0 exact bypass: err=${maxErr}`)
+})
+
+test('rotary — streaming continuity across split buffers; no NaN/Inf, length preserved', () => {
+	let fs = 44100, N = 8192, half = N >> 1
+	let full = sine(440, N, fs)
+	let pFull = { fs, hornSpeed: 6.7, drumSpeed: 5.9, depth: 1 }
+	let [fullL] = rotaryStereo(full, pFull)
+
+	let pCont = { fs, hornSpeed: 6.7, drumSpeed: 5.9, depth: 1 }
+	let [aL] = rotaryStereo(sine(440, half, fs), pCont)
+	let secondHalf = new Float64Array(half)
+	for (let i = 0; i < half; i++) secondHalf[i] = Math.sin(2 * Math.PI * 440 * (i + half) / fs)
+	let [bL] = rotaryStereo(secondHalf, pCont)
+
+	let maxErr = 0
+	for (let i = 0; i < half; i++) maxErr = Math.max(maxErr, Math.abs(aL[i] - fullL[i]), Math.abs(bL[i] - fullL[half + i]))
+	ok(maxErr < 1e-9, `split-buffer continuity matches one continuous call: err=${maxErr}`)
+	ok(fullL.length === N && aL.length === half, 'length preserved')
+	ok(fullL.every(Number.isFinite) && aL.every(Number.isFinite) && bL.every(Number.isFinite), 'no NaN/Inf')
 })
 
 test('ringMod — produces sum/difference frequencies', () => {
@@ -512,4 +652,109 @@ test('frequencyShifter — dry/wet blend is group-delay aligned (no comb at mix<
 	let maxErr = 0
 	for (let i = taps; i < n; i++) maxErr = Math.max(maxErr, Math.abs(data[i] - inp[i - M]))
 	ok(maxErr < 1e-3, `mix .5 output ≡ M-delayed input (maxErr ${maxErr.toExponential(2)})`)
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Tape stop — batch, whole-render: variable-rate playback via a decelerating (or
+// accelerating) read pointer. streaming: false in the manifest — kernel itself is a
+// pure (data, opts) function, so every test calls it directly.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// instantaneous frequency via zero-crossing spacing in a window centered at `centerT`
+function instFreq (d, fs, centerT, winMs = 50) {
+	let win = (winMs / 1000 * fs) | 0
+	let center = (centerT * fs) | 0
+	let from = Math.max(0, center - (win >> 1)), to = Math.min(d.length, center + (win >> 1))
+	let cross = []
+	for (let i = from + 1; i < to; i++) if (d[i - 1] < 0 && d[i] >= 0) cross.push(i + (0 - d[i - 1]) / (d[i] - d[i - 1]))
+	if (cross.length < 2) return NaN
+	let sum = 0
+	for (let i = 1; i < cross.length; i++) sum += cross[i] - cross[i - 1]
+	return fs / (sum / (cross.length - 1))
+}
+
+test('tapestop — linear (curve=1) pitch trajectory follows f0·(1 − t/time)', () => {
+	let fs = 44100, N = Math.round(1.5 * fs)
+	let data = sine(1000, N, fs)
+	fx.tapeStop(data, { at: 0, time: 1, curve: 1, fs })
+	for (let t of [0.2, 0.5, 0.8]) {
+		let f = instFreq(data, fs, t)
+		let expect = 1000 * (1 - t)
+		ok(Math.abs(f - expect) / expect < 0.04, `t=${t}: ${f.toFixed(1)} Hz ≈ ${expect} Hz`)
+	}
+})
+
+test('tapestop — consumed input over a linear ramp sits at ≈ time/2', () => {
+	let fs = 44100, N = Math.round(1.5 * fs), time = 1
+	let data = new Float64Array(N)
+	for (let i = 0; i < N; i++) data[i] = i // ramp — output value directly encodes input position read
+	fx.tapeStop(data, { at: 0, time, curve: 1, fs })
+	let max = 0
+	for (let i = 0; i < N; i++) if (data[i] > max) max = data[i]
+	let expect = (time / 2) * fs
+	ok(Math.abs(max - expect) / expect < 0.02, `max output ${max.toFixed(0)} ≈ ramp[T/2]=${expect}`)
+})
+
+test('tapestop — silence after the stop completes', () => {
+	let fs = 44100, N = Math.round(1.5 * fs)
+	let data = sine(1000, N, fs)
+	fx.tapeStop(data, { at: 0, time: 1, curve: 1, fs })
+	let from = Math.round(1.01 * fs)
+	ok(rms(data, from, N) === 0, 'output silent after time elapses')
+})
+
+test('tapestop — content before `at` is bit-identical to input', () => {
+	let fs = 44100, N = fs
+	let data = sine(1000, N, fs)
+	let orig = Float64Array.from(data)
+	fx.tapeStop(data, { at: 0.5, time: 1, curve: 1, fs })
+	let atN = Math.round(0.5 * fs)
+	let maxErr = 0
+	for (let i = 0; i < atN; i++) maxErr = Math.max(maxErr, Math.abs(data[i] - orig[i]))
+	ok(maxErr === 0, `pre-'at' region unchanged: err=${maxErr}`)
+})
+
+test('tapestop — curve=2 falls faster than curve=1 (linear) early in the ramp', () => {
+	let fs = 44100, N = Math.round(1.5 * fs)
+	let data = sine(1000, N, fs)
+	fx.tapeStop(data, { at: 0, time: 1, curve: 2, fs })
+	let f = instFreq(data, fs, 0.5)
+	ok(f < 500, `curve=2 freq@0.5s = ${f.toFixed(1)} Hz < 500 Hz (linear case)`)
+})
+
+test('tapestop — spin-up (direction: start) ramps 0 → f0', () => {
+	let fs = 44100, N = fs
+	let data = sine(1000, N, fs)
+	fx.tapeStop(data, { at: 0, time: 0.5, curve: 1, direction: 'start', fs })
+	let early = instFreq(data, fs, 0.1)
+	let late = instFreq(data, fs, 0.7)
+	ok(early < 500, `t=0.1 well below f0: ${early.toFixed(1)} Hz`)
+	ok(Math.abs(late - 1000) / 1000 < 0.02, `t=0.7 (past ramp) ≈ f0: ${late.toFixed(1)} Hz`)
+})
+
+test('tapestop — flutter is seeded-deterministic', () => {
+	let fs = 44100, N = fs
+	let mk = () => sine(1000, N, fs)
+
+	let a = mk(), b = mk()
+	fx.tapeStop(a, { at: 0, time: 1, flutter: 0.5, seed: 42, fs })
+	fx.tapeStop(b, { at: 0, time: 1, flutter: 0.5, seed: 42, fs })
+	ok(a.every((v, i) => v === b[i]), 'same seed → identical output')
+
+	let c = mk()
+	fx.tapeStop(c, { at: 0, time: 1, flutter: 0.5, seed: 43, fs })
+	ok(a.some((v, i) => v !== c[i]), 'different seed → different output')
+
+	let d = mk(), e = mk()
+	fx.tapeStop(d, { at: 0, time: 1, flutter: 0, fs })
+	fx.tapeStop(e, { at: 0, time: 1, flutter: 0, fs })
+	ok(d.every((v, i) => v === e[i]), 'flutter=0 deterministic regardless of seed')
+})
+
+test('tapestop — length preserved, no NaN/Inf', () => {
+	let fs = 44100, N = 22050
+	let data = sine(1000, N, fs)
+	fx.tapeStop(data, { at: 0.2, time: 0.5, flutter: 0.3, fs })
+	ok(data.length === N, 'length preserved')
+	ok(data.every(Number.isFinite), 'no NaN/Inf')
 })

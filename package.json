@@ -76,6 +76,8 @@
     "@audio/effect-lofi": "^1.0.0",
     "@audio/effect-sbr": "^1.0.0",
     "@audio/effect-stutter": "^1.0.0",
-    "@audio/effect-subbass": "^1.0.0"
+    "@audio/effect-subbass": "^1.0.0",
+    "@audio/effect-rotary": "^0.1.0",
+    "@audio/effect-tapestop": "^0.1.0"
   }
 }

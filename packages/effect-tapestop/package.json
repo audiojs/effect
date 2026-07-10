@@ -1,0 +1,46 @@
+{
+  "name": "@audio/effect-tapestop",
+  "version": "0.1.0",
+  "description": "Tape-stop / spin-down — variable-rate playback with a decelerating read pointer",
+  "type": "module",
+  "sideEffects": false,
+  "main": "tapestop.js",
+  "exports": {
+    ".": "./tapestop.js",
+    "./package.json": "./package.json",
+    "./audio": {
+      "types": "./audio.d.ts",
+      "default": "./audio.js"
+    }
+  },
+  "files": [
+    "tapestop.js",
+    "audio.js",
+    "audio.d.ts"
+  ],
+  "keywords": [
+    "audio",
+    "dsp",
+    "effect",
+    "tapestop",
+    "spindown"
+  ],
+  "license": "MIT",
+  "author": "Dmitry Iv. <dfcreative@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audiojs/effect.git",
+    "directory": "packages/effect-tapestop"
+  },
+  "homepage": "https://github.com/audiojs/effect/tree/main/packages/effect-tapestop",
+  "bugs": {
+    "url": "https://github.com/audiojs/effect/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "audio": "./audio.js"
+}

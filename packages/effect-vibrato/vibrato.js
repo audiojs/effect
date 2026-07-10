@@ -18,6 +18,7 @@ export default function vibrato (data, params) {
 		params._phase = 0
 	}
 	let buf = params.buffer, ptr = params.ptr, phase = params._phase
+	if (ptr >= maxDelay) ptr = 0  // depth shrank live — re-enter the active ring
 	let inc = 2 * PI * rate / fs
 
 	for (let i = 0, l = data.length; i < l; i++) {
@@ -27,8 +28,8 @@ export default function vibrato (data, params) {
 		phase += inc
 		if (phase > 2 * PI) phase -= 2 * PI
 
-		let readPos = ptr - d
-		if (readPos < 0) readPos += maxDelay
+		// total wrap — robust for any d/ptr after live param changes
+		let readPos = ((ptr - d) % maxDelay + maxDelay) % maxDelay
 
 		let idx = floor(readPos)
 		let frac = readPos - idx

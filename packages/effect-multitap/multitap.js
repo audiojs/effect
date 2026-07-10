@@ -7,15 +7,23 @@ export default function multitap (data, params) {
 	let feedback = params.feedback ?? 0
 	let fs = params.fs || 44100
 
-	let maxDelay = 0
-	let tapSamples = taps.map(t => {
-		let d = (t.time * fs) | 0
-		if (d > maxDelay) maxDelay = d
-		return { d, gain: t.gain ?? 0.5 }
-	})
+	// recompute tap offsets only when params change — steady-state calls allocate nothing.
+	// Tracked by reference: replace the taps array to change taps (in-place mutation isn't seen).
+	if (params._taps !== taps || params._fs !== fs) {
+		let maxDelay = 1  // ≥1 so the ring buffer is never zero-length (taps at time 0)
+		params._tapSamples = taps.map(t => {
+			let d = (t.time * fs) | 0
+			if (d > maxDelay) maxDelay = d
+			return { d, gain: t.gain ?? 0.5 }
+		})
+		params._maxDelay = maxDelay
+		params._taps = taps
+		params._fs = fs
+	}
+	let tapSamples = params._tapSamples
 
-	if (!params.buffer || params.buffer.length < maxDelay) {
-		params.buffer = new Float64Array(maxDelay)
+	if (!params.buffer || params.buffer.length < params._maxDelay) {
+		params.buffer = new Float64Array(params._maxDelay)
 		params.ptr = 0
 	}
 	let buf = params.buffer, ptr = params.ptr

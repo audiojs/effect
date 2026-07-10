@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-multitap",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Multi-tap delay — multiple delay taps at different times and gains",
   "type": "module",
   "sideEffects": false,

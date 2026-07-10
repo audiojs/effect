@@ -59,7 +59,10 @@ export default function frequencyShifter (data, params) {
 		// Upper-sideband shift: Re{(real + j·imag)(cos + j·sin)}
 		let y = real * c - imag * s
 
-		data[i] = x * (1 - mix) + y * mix
+		// Blend against the group-delay-aligned dry (`real`, M samples back) — an
+		// undelayed dry would comb with the wet at mix < 1. Output delay is a
+		// constant M at every mix, matching the declared atom latency.
+		data[i] = real * (1 - mix) + y * mix
 		p = (p + 1) % N
 	}
 

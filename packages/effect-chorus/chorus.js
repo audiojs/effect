@@ -8,7 +8,7 @@ export default function chorus (data, params) {
 	let rate = params.rate == null ? 1.5 : params.rate
 	let depth = params.depth == null ? 0.5 : params.depth
 	let delay = params.delay == null ? 20 : params.delay
-	let voices = params.voices || 3
+	let voices = Math.max(1, (params.voices || 3) | 0)  // integer ≥ 1 — wet/voices below
 	let fs = params.fs || 44100
 
 	let maxDelay = (delay * 2 * fs / 1000) | 0
@@ -17,10 +17,14 @@ export default function chorus (data, params) {
 	if (!params.buffer || params.buffer.length < maxDelay) {
 		params.buffer = new Float64Array(maxDelay)
 		params.ptr = 0
+	}
+	// voices can change live — a short phase array would feed NaN into the LFOs
+	if (!params._phases || params._phases.length !== voices) {
 		params._phases = new Float64Array(voices)
 		for (let v = 0; v < voices; v++) params._phases[v] = v / voices * 2 * PI
 	}
 	let buf = params.buffer, ptr = params.ptr, phases = params._phases
+	if (ptr >= maxDelay) ptr = 0  // delay shrank live — re-enter the active ring
 	let inc = 2 * PI * rate / fs
 
 	for (let i = 0, l = data.length; i < l; i++) {
@@ -33,8 +37,8 @@ export default function chorus (data, params) {
 			phases[v] += inc
 			if (phases[v] > 2 * PI) phases[v] -= 2 * PI
 
-			let readPos = ptr - d
-			if (readPos < 0) readPos += maxDelay
+			// total wrap — d may reach/exceed maxDelay (depth ≈ 1 vs floored buffer size)
+			let readPos = ((ptr - d) % maxDelay + maxDelay) % maxDelay
 
 			let idx = floor(readPos)
 			let frac = readPos - idx

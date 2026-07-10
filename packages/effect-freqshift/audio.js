@@ -1,8 +1,7 @@
 // atom manifest — wraps the frequency-shifter atom (Hilbert-FIR SSB shift).
 // `taps` sizes the FIR and sets the fixed group delay (flags: restart) — declared
-// latency mirrors the limiter pilot. NOTE: the kernel's dry/wet mix blends an undelayed
-// dry sample against the (taps-1)/2-sample-delayed wet path (see kernel defect notes in
-// the family report) — alignment is only exact at mix=1.
+// latency mirrors the limiter pilot. The kernel blends dry and wet at the same
+// (taps-1)/2-sample group delay, so the declared latency holds at every mix.
 
 import frequencyShifterFn from './frequency-shifter.js'
 

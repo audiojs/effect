@@ -7,15 +7,16 @@ let {sin, tan, PI} = Math
 export default function phaser (data, params) {
 	let rate = params.rate == null ? 0.5 : params.rate
 	let depth = params.depth == null ? 0.7 : params.depth
-	let stages = params.stages || 4
+	let stages = (params.stages || 4) | 0
 	let feedback = params.feedback == null ? 0.5 : params.feedback
 	let fc = params.fc || 1000
 	let fs = params.fs || 44100
 
-	if (!params._ap) {
+	// stages can change live — a short allpass-state array would feed NaN through the cascade
+	if (!params._ap || params._ap.length !== stages * 2) {
 		params._ap = new Float64Array(stages * 2)
-		params._phase = 0
-		params._fb = 0
+		params._phase ??= 0
+		params._fb ??= 0
 	}
 	let ap = params._ap, phase = params._phase, fb = params._fb
 	let inc = 2 * PI * rate / fs

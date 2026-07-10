@@ -20,6 +20,7 @@ export default function flanger (data, params) {
 		params._phase = 0
 	}
 	let buf = params.buffer, ptr = params.ptr, phase = params._phase
+	if (ptr >= maxDelay) ptr = 0  // delay shrank live — re-enter the active ring
 	let inc = 2 * PI * rate / fs
 
 	for (let i = 0, l = data.length; i < l; i++) {
@@ -28,8 +29,8 @@ export default function flanger (data, params) {
 		if (phase > 2 * PI) phase -= 2 * PI
 
 		let d = delaySamples * (1 + depth * lfo)
-		let readPos = ptr - d
-		if (readPos < 0) readPos += maxDelay
+		// total wrap — d may reach/exceed maxDelay (depth ≈ 1 vs floored buffer size)
+		let readPos = ((ptr - d) % maxDelay + maxDelay) % maxDelay
 
 		let idx = floor(readPos)
 		let frac = readPos - idx

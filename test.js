@@ -336,13 +336,17 @@ test('frequencyShifter — 200 Hz up shifts peak to ~640 Hz', () => {
 	ok(e640 > e440, `shifted energy at 640Hz (${e640.toFixed(0)}) > original 440Hz (${e440.toFixed(0)})`)
 })
 
-test('frequencyShifter — mix=0 is passthrough', () => {
+test('frequencyShifter — mix=0 is the delay-aligned dry (constant latency at every mix)', () => {
+	// Dry and wet share the Hilbert group delay M, so the declared atom latency
+	// holds for any mix — an undelayed mix-0 dry would arrive M samples early
+	// after host latency compensation (and comb against the wet at 0 < mix < 1).
+	let taps = 65, M = (taps - 1) >> 1
 	let data = sine(440, 4096)
 	let orig = Float64Array.from(data)
-	fx.frequencyShifter(data, { shift: 100, mix: 0, fs: 44100 })
+	fx.frequencyShifter(data, { shift: 100, mix: 0, taps, fs: 44100 })
 	let maxErr = 0
-	for (let i = 0; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxErr) maxErr = d }
-	ok(maxErr < 1e-10, `mix=0 passthrough: err=${maxErr}`)
+	for (let i = M; i < data.length; i++) { let d = Math.abs(data[i] - orig[i - M]); if (d > maxErr) maxErr = d }
+	ok(maxErr < 1e-10, `mix=0 ≡ M-delayed input: err=${maxErr}`)
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -433,4 +437,79 @@ test('sbr — regenerates content above the cutoff', () => {
 	ok(goertzel(d, 6000) > above * 5 + 1e-6, 'harmonics land above cutoff')
 	almost(goertzel(d, 3000) / 0.3, 1, 0.15)  // program band substantially intact
 	ok(d.every(isFinite))
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Live-resize / mix-alignment regressions (kernel defects flagged by manifest verification)
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('chorus — depth 1 stays finite (read distance may reach ring size)', () => {
+	let p = { rate: 2, depth: 1, delay: 20, voices: 3, fs: 44100 }
+	let data = sine(440, 44100)
+	fx.chorus(data, p)
+	ok(data.every(Number.isFinite), 'no NaN at full depth')
+})
+
+test('chorus — live voices increase keeps state finite', () => {
+	let p = { rate: 1.5, depth: 0.5, delay: 20, voices: 2, fs: 44100 }
+	fx.chorus(sine(440, 4096), p)
+	p.voices = 5
+	let data = sine(440, 4096)
+	fx.chorus(data, p)
+	ok(data.every(Number.isFinite), 'no NaN after voices grew')
+})
+
+test('chorus/flanger/vibrato — live delay/depth shrink keeps ring pointer valid', () => {
+	let pc = { rate: 1.5, depth: 0.5, delay: 30, fs: 44100 }
+	fx.chorus(sine(440, 4096), pc)
+	pc.delay = 5
+	let d1 = sine(440, 4096); fx.chorus(d1, pc)
+	ok(d1.every(Number.isFinite), 'chorus survives delay shrink')
+
+	let pf = { rate: 0.3, depth: 1, delay: 6, feedback: 0.5, fs: 44100 }
+	fx.flanger(sine(440, 4096), pf)
+	pf.delay = 1
+	let d2 = sine(440, 4096); fx.flanger(d2, pf)
+	ok(d2.every(Number.isFinite), 'flanger survives delay shrink at full depth')
+
+	let pv = { rate: 5, depth: 0.005, fs: 44100 }
+	fx.vibrato(sine(440, 4096), pv)
+	pv.depth = 0.001
+	let d3 = sine(440, 4096); fx.vibrato(d3, pv)
+	ok(d3.every(Number.isFinite), 'vibrato survives depth shrink')
+})
+
+test('phaser — live stages change keeps cascade finite', () => {
+	let p = { rate: 0.5, depth: 0.7, stages: 4, feedback: 0.5, fs: 44100 }
+	fx.phaser(sine(440, 4096), p)
+	p.stages = 8
+	let data = sine(440, 4096)
+	fx.phaser(data, p)
+	ok(data.every(Number.isFinite), 'no NaN after stages grew')
+})
+
+test('multitap — steady-state calls reuse tap table; zero-time tap stays finite', () => {
+	let taps = [{ time: 0.01, gain: 0.5 }]
+	let p = { taps, fs: 44100 }
+	fx.multitap(new Float64Array(512), p)
+	let table = p._tapSamples
+	fx.multitap(new Float64Array(512), p)
+	ok(p._tapSamples === table, 'tap table cached across calls (no per-call allocation)')
+
+	let z = { taps: [{ time: 0, gain: 0.5 }], fs: 44100 }
+	let data = impulse(256)
+	fx.multitap(data, z)
+	ok(data.every(Number.isFinite), 'zero-length delay guarded')
+})
+
+test('frequencyShifter — dry/wet blend is group-delay aligned (no comb at mix<1)', () => {
+	// shift 0 → wet ≡ delayed dry, so ANY mix must equal the input delayed by (taps-1)/2.
+	// The old kernel blended undelayed dry: mix .5 combed (≈ (x[i] + x[i−M])/2).
+	let taps = 65, M = (taps - 1) >> 1, n = 8192
+	let inp = sine(1000, n)
+	let data = inp.slice()
+	fx.frequencyShifter(data, { shift: 0, mix: 0.5, taps, fs: 44100 })
+	let maxErr = 0
+	for (let i = taps; i < n; i++) maxErr = Math.max(maxErr, Math.abs(data[i] - inp[i - M]))
+	ok(maxErr < 1e-3, `mix .5 output ≡ M-delayed input (maxErr ${maxErr.toExponential(2)})`)
 })

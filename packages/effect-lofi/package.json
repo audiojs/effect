@@ -19,11 +19,15 @@
   "exports": {
     ".": "./lofi.js",
     "./package.json": "./package.json",
-    "./audio": "./audio.js"
+    "./audio": {
+      "types": "./audio.d.ts",
+      "default": "./audio.js"
+    }
   },
   "files": [
     "lofi.js",
-    "audio.js"
+    "audio.js",
+    "audio.d.ts"
   ],
   "publishConfig": {
     "access": "public"

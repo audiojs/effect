@@ -19,11 +19,15 @@
   "exports": {
     ".": "./stutter.js",
     "./package.json": "./package.json",
-    "./audio": "./audio.js"
+    "./audio": {
+      "types": "./audio.d.ts",
+      "default": "./audio.js"
+    }
   },
   "files": [
     "stutter.js",
-    "audio.js"
+    "audio.js",
+    "audio.d.ts"
   ],
   "publishConfig": {
     "access": "public"

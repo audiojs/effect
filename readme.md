@@ -8,7 +8,7 @@ Canonical audio effect implementations.
 <sub>[Phaser](#phaser) · [Flanger](#flanger) · [Chorus](#chorus) · [Wah-wah](#wah-wah) · [Tremolo](#tremolo) · [Vibrato](#vibrato) · [Rotary speaker](#rotary-speaker) · [Ring mod](#ring-mod) · [Frequency shifter](#frequency-shifter) · [Pitch shifter](#pitch-shifter) · [Auto-wah](#auto-wah)</sub>
 
 **[Dynamics](#dynamics)**<br>
-<sub>[Compressor](#compressor) · [Limiter](#limiter) · [Noise gate](#noise-gate) · [Envelope follower](#envelope-follower) · [Transient shaper](#transient-shaper) · [Expander](#expander)</sub>
+<sub>moved to [`@audio/dynamics`](https://github.com/audiojs/dynamics)</sub>
 
 **[Delay](#delay)**<br>
 <sub>[Delay](#delay-1) · [Multitap](#multitap) · [Ping-pong](#ping-pong) · [Reverb](#reverb)</sub>
@@ -285,129 +285,7 @@ for (let buf of stream) autoWah(buf, p)
 
 ## Dynamics
 
-Gain-control effects that respond to signal level.
-
-### Compressor
-
-Reduces dynamic range above threshold — feedforward with envelope follower and soft knee.
-
-**`threshold`** dB (default −20) · **`ratio`** compression ratio (default 4) · **`attack`** seconds (default 0.003) · **`release`** seconds (default 0.1) · **`knee`** soft knee width dB (default 0) · **`makeupGain`** dB (default 0) · **`fs`** sample rate
-
-```js
-import { compressor } from '@audio/dynamics'
-
-let p = { threshold: -18, ratio: 4, attack: 0.003, release: 0.1, fs: 44100 }
-for (let buf of stream) compressor(buf, p)
-```
-
-**Use when**: taming peaks, bus glue, leveling vocals<br>
-**Not for**: hard limiting (use limiter)
-
-<!-- ![Compressor](plot/compressor.svg) -->
-
-
-### Limiter
-
-Hard ceiling — infinite-ratio compressor, clamps peaks to threshold.
-
-**`threshold`** linear amplitude ceiling (default 0.9) · **`release`** seconds (default 0.1) · **`fs`** sample rate
-
-```js
-import { limiter } from '@audio/dynamics'
-
-let p = { threshold: 0.9, release: 0.05, fs: 44100 }
-for (let buf of stream) limiter(buf, p)
-```
-
-**Use when**: preventing clipping, master bus ceiling, broadcast compliance<br>
-**Not for**: transparent dynamic control (use compressor)
-
-<!-- ![Limiter](plot/limiter.svg) -->
-
-
-### Noise gate
-
-Attenuates signal below threshold — cleans up noise in pauses.
-
-**`threshold`** dB (default −40) · **`range`** attenuation when closed dB (default −80) · **`attack`** seconds (default 0.001) · **`release`** seconds (default 0.05) · **`fs`** sample rate
-
-```js
-import { gate } from '@audio/dynamics'
-
-let p = { threshold: -30, range: -80, attack: 0.001, release: 0.05, fs: 44100 }
-for (let buf of stream) gate(buf, p)
-```
-
-**Use when**: removing mic bleed, drum gate, noise floor cleanup<br>
-**Not for**: compression or amplitude control
-
-<!-- ![Noise gate](plot/gate.svg) -->
-
-
-### Envelope follower
-
-Rectifies and smooths signal to extract amplitude envelope — outputs envelope as signal.
-
-**`attack`** seconds (default 0.01) · **`release`** seconds (default 0.1) · **`fs`** sample rate
-
-```js
-import { envelope } from '@audio/dynamics'
-
-let p = { attack: 0.005, release: 0.05, fs: 44100 }
-for (let buf of stream) envelope(buf, p)
-// buf now contains the envelope curve
-```
-
-**Use when**: sidechain source, envelope-controlled parameters, VCA control<br>
-**Not for**: gain reduction (use compressor)
-
-<!-- ![Envelope follower](plot/envelope.svg) -->
-
-
-### Transient shaper
-
-Separately amplifies or attenuates transient (attack) and sustain portions.
-
-**`attackGain`** transient multiplier (default 1) · **`sustainGain`** sustain multiplier (default 0) · **`fs`** sample rate
-
-```js
-import { transientShaper } from '@audio/dynamics'
-
-let p = { attackGain: 2, sustainGain: -0.5, fs: 44100 }
-for (let buf of stream) transientShaper(buf, p)
-```
-
-**Use when**: drum punch enhancement, click reduction, transient design<br>
-**Not for**: general dynamic range control
-
-<!-- ![Transient shaper](plot/transient-shaper.svg) -->
-
-
-### Expander
-
-Downward expansion below threshold — attenuates quiet signals, complementing compression.
-
-**`threshold`** dB (default −40) · **`ratio`** expansion ratio > 1 (default 2) · **`range`** maximum attenuation floor dB (default −60) · **`attack`** seconds (default 0.001) · **`release`** seconds (default 0.1) · **`fs`** sample rate
-
-```js
-import { expander } from '@audio/dynamics'
-
-let p = { threshold: -40, ratio: 2, range: -60, attack: 0.001, release: 0.1, fs: 44100 }
-for (let buf of stream) expander(buf, p)
-```
-
-**Transfer function**: for each `dB < threshold`, `gainDB = max((ratio−1)×(dB−threshold), range)`
-
-| ratio | effect |
-|---|---|
-| 2 | gentle expansion, doubles apparent dynamic range |
-| 4 | aggressive, close to gate behavior |
-| ∞ | pure gate |
-
-**Use when**: subtle noise reduction, dynamic restoration, complementing compression<br>
-**Not for**: hard noise removal (use gate)
-
-<!-- ![Expander](plot/expander.svg) -->
+Dynamics processing lives in [@audio/dynamics](https://github.com/audiojs/dynamics) — compressor, limiter, gate, expander, deesser, ducker, softclip, compand, multiband, character models (fet/opto/vca/varimu), leveler. See its README for the accurate API (note: dynamics kernels read `sampleRate`, not `fs`, and attack/release are in ms).
 
 
 ## Delay

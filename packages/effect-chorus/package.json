@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-chorus",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Chorus — multiple detuned delay lines for ensemble thickening",
   "type": "module",
   "sideEffects": false,
@@ -8,11 +8,11 @@
   "exports": {
     ".": "./chorus.js",
     "./package.json": "./package.json",
-    "./atom": "./atom.js"
+    "./audio": "./audio.js"
   },
   "files": [
     "chorus.js",
-    "atom.js"
+    "audio.js"
   ],
   "keywords": [
     "audio",
@@ -37,5 +37,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "atom": "./atom.js"
+  "audio": "./audio.js"
 }

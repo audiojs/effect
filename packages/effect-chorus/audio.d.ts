@@ -14,7 +14,7 @@ export interface ChorusOptions {
   "rate"?: Auto
   /** 0..1 (default 0.5) */
   "depth"?: Auto
-  /** 2..50 ms (default 20) */
+  /** 0.002..0.05 s (default 0.02) */
   "delay"?: Auto
   /** 1..8 (default 3) */
   "voices"?: Auto
@@ -31,8 +31,8 @@ export declare const chorus: {
     "rate": { type: "number", default: 1.5 }
     /** 0..1 (default 0.5) */
     "depth": { type: "number", default: 0.5 }
-    /** 2..50 ms (default 20) [restart] */
-    "delay": { type: "number", default: 20 }
+    /** 0.002..0.05 s (default 0.02) [restart] */
+    "delay": { type: "number", default: 0.02 }
     /** 1..8 (default 3) [restart] */
     "voices": { type: "number", default: 3 }
   }

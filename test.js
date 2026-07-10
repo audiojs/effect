@@ -35,16 +35,29 @@ test('phaser — stable over long buffer', () => {
 test('flanger — produces modulated output', () => {
 	let data = sine(440, 4096)
 	let orig = Float64Array.from(data)
-	fx.flanger(data, { rate: 0.3, depth: 0.7, delay: 3, feedback: 0.5, fs: 44100 })
+	fx.flanger(data, { rate: 0.3, depth: 0.7, delay: 0.003, feedback: 0.5, fs: 44100 })
 	ok(data.some((x, i) => Math.abs(x - orig[i]) > 0.01), 'flanger modifies signal')
 	ok(data.every(isFinite), 'no NaN/Inf')
 })
 
 test('chorus — produces output', () => {
 	let data = sine(440, 4096)
-	fx.chorus(data, { rate: 1.5, depth: 0.5, delay: 20, voices: 3, fs: 44100 })
+	fx.chorus(data, { rate: 1.5, depth: 0.5, delay: 0.02, voices: 3, fs: 44100 })
 	ok(data.some(x => Math.abs(x) > 0.01), 'chorus output present')
 	ok(data.every(isFinite), 'no NaN/Inf')
+})
+
+test('chorus/flanger — delay is seconds (0.007 behaves like the pre-unification 7ms)', () => {
+	let dataC = sine(440, 4096)
+	fx.chorus(dataC, { rate: 1.5, depth: 0.5, delay: 0.007, voices: 3, fs: 44100 })
+	ok(dataC.some(x => Math.abs(x) > 0.01), 'chorus at delay=0.007s produces output')
+	ok(dataC.every(isFinite), 'chorus no NaN/Inf')
+
+	let dataF = sine(440, 4096)
+	let orig = Float64Array.from(dataF)
+	fx.flanger(dataF, { rate: 0.3, depth: 0.7, delay: 0.007, feedback: 0.5, fs: 44100 })
+	ok(dataF.some((x, i) => Math.abs(x - orig[i]) > 0.01), 'flanger at delay=0.007s modifies signal')
+	ok(dataF.every(isFinite), 'flanger no NaN/Inf')
 })
 
 test('wah — produces bandpass-like output', () => {
@@ -72,9 +85,26 @@ test('tremolo — depth=0 is passthrough', () => {
 test('vibrato — modulates pitch', () => {
 	let data = sine(440, 4096)
 	let orig = Float64Array.from(data)
-	fx.vibrato(data, { rate: 5, depth: 0.003, fs: 44100 })
+	fx.vibrato(data, { rate: 5, depth: 0.5, fs: 44100 })  // default — swing ≙ pre-unification 0.003s
 	ok(data.some((x, i) => Math.abs(x - orig[i]) > 0.01), 'vibrato modifies signal')
 	ok(data.every(isFinite), 'no NaN/Inf')
+})
+
+test('vibrato — depth 0 is passthrough-ish, depth 1 modulates strongly', () => {
+	let dry = sine(440, 4096)
+
+	let d0 = Float64Array.from(dry)
+	fx.vibrato(d0, { rate: 5, depth: 0, fs: 44100 })
+	let err0 = 0
+	for (let i = 0; i < d0.length; i++) err0 = Math.max(err0, Math.abs(d0[i] - dry[i]))
+	ok(err0 < 0.01, `depth=0 near-passthrough: err=${err0.toFixed(4)}`)
+
+	let d1 = Float64Array.from(dry)
+	fx.vibrato(d1, { rate: 5, depth: 1, fs: 44100 })
+	let err1 = 0
+	for (let i = 0; i < d1.length; i++) err1 = Math.max(err1, Math.abs(d1[i] - dry[i]))
+	ok(err1 > 0.3, `depth=1 modulates strongly: err=${err1.toFixed(3)}`)
+	ok(d1.every(Number.isFinite), 'no NaN/Inf at full depth')
 })
 
 // ── Rotary speaker — Leslie: crossover-split horn/drum rotors, each producing Doppler
@@ -584,14 +614,14 @@ test('sbr — regenerates content above the cutoff', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 test('chorus — depth 1 stays finite (read distance may reach ring size)', () => {
-	let p = { rate: 2, depth: 1, delay: 20, voices: 3, fs: 44100 }
+	let p = { rate: 2, depth: 1, delay: 0.02, voices: 3, fs: 44100 }
 	let data = sine(440, 44100)
 	fx.chorus(data, p)
 	ok(data.every(Number.isFinite), 'no NaN at full depth')
 })
 
 test('chorus — live voices increase keeps state finite', () => {
-	let p = { rate: 1.5, depth: 0.5, delay: 20, voices: 2, fs: 44100 }
+	let p = { rate: 1.5, depth: 0.5, delay: 0.02, voices: 2, fs: 44100 }
 	fx.chorus(sine(440, 4096), p)
 	p.voices = 5
 	let data = sine(440, 4096)
@@ -600,21 +630,21 @@ test('chorus — live voices increase keeps state finite', () => {
 })
 
 test('chorus/flanger/vibrato — live delay/depth shrink keeps ring pointer valid', () => {
-	let pc = { rate: 1.5, depth: 0.5, delay: 30, fs: 44100 }
+	let pc = { rate: 1.5, depth: 0.5, delay: 0.03, fs: 44100 }
 	fx.chorus(sine(440, 4096), pc)
-	pc.delay = 5
+	pc.delay = 0.005
 	let d1 = sine(440, 4096); fx.chorus(d1, pc)
 	ok(d1.every(Number.isFinite), 'chorus survives delay shrink')
 
-	let pf = { rate: 0.3, depth: 1, delay: 6, feedback: 0.5, fs: 44100 }
+	let pf = { rate: 0.3, depth: 1, delay: 0.006, feedback: 0.5, fs: 44100 }
 	fx.flanger(sine(440, 4096), pf)
-	pf.delay = 1
+	pf.delay = 0.001
 	let d2 = sine(440, 4096); fx.flanger(d2, pf)
 	ok(d2.every(Number.isFinite), 'flanger survives delay shrink at full depth')
 
-	let pv = { rate: 5, depth: 0.005, fs: 44100 }
+	let pv = { rate: 5, depth: 1, fs: 44100 }
 	fx.vibrato(sine(440, 4096), pv)
-	pv.depth = 0.001
+	pv.depth = 0.1
 	let d3 = sine(440, 4096); fx.vibrato(d3, pv)
 	ok(d3.every(Number.isFinite), 'vibrato survives depth shrink')
 })

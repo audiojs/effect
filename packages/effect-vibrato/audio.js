@@ -1,6 +1,6 @@
 // atom manifest — wraps the vibrato atom; state rides per-channel params objects.
-// `depth` (modulation excursion, seconds) sizes the delay buffer at construction
-// (flags: restart); rate is live.
+// `depth` (0..1, scales a fixed max delay-time swing — see vibrato.js maxSwing)
+// sizes the delay buffer at construction (flags: restart); rate is live.
 
 import vibratoFn from './vibrato.js'
 
@@ -20,8 +20,8 @@ export const vibrato = (ctx) => {
 	}
 }
 vibrato.channels = 'any'
-vibrato.tail = 0.05 // no feedback — hard drain bound: maxDelay ≈ 2 × depth.max(20ms) = 40ms
+vibrato.tail = 0.02 // no feedback — hard drain bound: maxDelay = 2 × maxSwing(0.006s) = 12ms
 vibrato.params = {
 	rate:  { type: 'number', min: 0.1, max: 15, default: 5, unit: 'Hz', curve: 'log' },
-	depth: { type: 'number', min: 0.0005, max: 0.02, default: 0.003, unit: 's', flags: ['restart'] },
+	depth: { type: 'number', min: 0, max: 1, default: 0.5, flags: ['restart'] },
 }

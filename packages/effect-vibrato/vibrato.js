@@ -4,13 +4,21 @@
 
 let {sin, floor, PI} = Math
 
+// depth is 0..1 (mirrors chorus/flanger), scaling a fixed max delay-time swing —
+// same shape as chorus's `delaySamples * (1 + depth * sin(...))`, except here the
+// swing itself (not a separate `delay` param) is what depth modulates.
+// maxSwing derived to preserve the pre-unification default: old depth was seconds
+// directly at implicit full modulation (× 1.0); 0.003s × 1.0 ≙ 0.5 × maxSwing ⇒ maxSwing = 0.006s.
+const maxSwing = 0.006
+
 export default function vibrato (data, params) {
 	let rate = params.rate == null ? 5 : params.rate
-	let depth = params.depth == null ? 0.003 : params.depth   // seconds
+	let depth = params.depth == null ? 0.5 : params.depth   // 0..1
 	let fs = params.fs || 44100
 
-	let maxDelay = (depth * 2 * fs + 2) | 0
-	let delaySamples = depth * fs
+	let swing = depth * maxSwing   // seconds
+	let maxDelay = (swing * 2 * fs + 2) | 0
+	let delaySamples = swing * fs
 
 	if (!params.buffer || params.buffer.length < maxDelay) {
 		params.buffer = new Float64Array(maxDelay)

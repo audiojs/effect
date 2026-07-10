@@ -22,10 +22,10 @@ export const chorus = (ctx) => {
 	}
 }
 chorus.channels = 'any'
-chorus.tail = 0.1 // no feedback — hard drain bound: maxDelay = 2 × delay.max(50ms) = 100ms
+chorus.tail = 0.1 // no feedback — hard drain bound: maxDelay = 2 × delay.max(0.05s) = 100ms
 chorus.params = {
 	rate:   { type: 'number', min: 0.05, max: 10, default: 1.5, unit: 'Hz', curve: 'log' },
 	depth:  { type: 'number', min: 0, max: 1, default: 0.5 },
-	delay:  { type: 'number', min: 2, max: 50, default: 20, unit: 'ms', flags: ['restart'] },
+	delay:  { type: 'number', min: 0.002, max: 0.05, default: 0.02, unit: 's', flags: ['restart'] },
 	voices: { type: 'number', min: 1, max: 8, default: 3, step: 1, flags: ['restart'] },
 }

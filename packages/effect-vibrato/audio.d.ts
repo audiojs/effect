@@ -12,7 +12,7 @@ type Process = (inputs: Float32Array[][], outputs: Float32Array[][], params: Liv
 export interface VibratoOptions {
   /** 0.1..15 Hz (default 5) */
   "rate"?: Auto
-  /** 0.0005..0.02 s (default 0.003) */
+  /** 0..1 (default 0.5) */
   "depth"?: Auto
   at?: number | string
   duration?: number | string
@@ -21,11 +21,11 @@ export interface VibratoOptions {
 export declare const vibrato: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 0.05
+  tail: 0.02
   params: {
     /** 0.1..15 Hz (default 5) */
     "rate": { type: "number", default: 5 }
-    /** 0.0005..0.02 s (default 0.003) [restart] */
-    "depth": { type: "number", default: 0.003 }
+    /** 0..1 (default 0.5) [restart] */
+    "depth": { type: "number", default: 0.5 }
   }
 }

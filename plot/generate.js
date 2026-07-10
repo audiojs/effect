@@ -52,7 +52,7 @@ const noise = (n, amp = 0.3) => { let d = new Float64Array(n); for (let i = 0; i
 	write('flanger', plotCompare(
 		phases.map((phase, i) => {
 			let d = new Float64Array(2048); d[0] = 1
-			let p = { rate: 0, depth: 0.7, delay: 3, feedback: 0.5, fs: FS, _phase: phase }
+			let p = { rate: 0, depth: 0.7, delay: 0.003, feedback: 0.5, fs: FS, _phase: phase }
 			fx.flanger(d, p)
 			return [labels[i], d.slice(0, 512)]
 		}),
@@ -64,7 +64,7 @@ const noise = (n, amp = 0.3) => { let d = new Float64Array(n); for (let i = 0; i
 // Chorus: spectrogram of sustained tone — shows shimmer spread
 {
 	let d = sine(440, 8192)
-	fx.chorus(d, { rate: 1.5, depth: 0.5, delay: 20, voices: 3, fs: FS })
+	fx.chorus(d, { rate: 1.5, depth: 0.5, delay: 0.02, voices: 3, fs: FS })
 	write('chorus', spectrogramPlot(d, 'Chorus — 440Hz shimmer spread (3 voices, delay=20ms)',
 		{ fs: FS, fMin: 200, fMax: 2000, dbFloor: -55 }))
 }
@@ -104,7 +104,7 @@ const noise = (n, amp = 0.3) => { let d = new Float64Array(n); for (let i = 0; i
 // Vibrato: spectrogram shows pitch wobble
 {
 	let d = sine(440, 8192)
-	fx.vibrato(d, { rate: 5, depth: 0.004, fs: FS })
+	fx.vibrato(d, { rate: 5, depth: 0.004 / 0.006, fs: FS })  // 0.004s swing ≙ depth 0.667 (maxSwing=0.006s)
 	write('vibrato', spectrogramPlot(d, 'Vibrato — 440Hz pitch wobble, rate=5Hz, depth=4ms',
 		{ fs: FS, fMin: 200, fMax: 1500, dbFloor: -50 }))
 }

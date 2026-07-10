@@ -7,12 +7,12 @@ let {sin, floor, PI} = Math
 export default function flanger (data, params) {
 	let rate = params.rate == null ? 0.3 : params.rate
 	let depth = params.depth == null ? 0.7 : params.depth
-	let delay = params.delay == null ? 3 : params.delay
+	let delay = params.delay == null ? 0.003 : params.delay  // seconds
 	let feedback = params.feedback == null ? 0.5 : params.feedback
 	let fs = params.fs || 44100
 
-	let maxDelay = (delay * 2 * fs / 1000) | 0
-	let delaySamples = delay * fs / 1000
+	let maxDelay = (delay * 2 * fs) | 0
+	let delaySamples = delay * fs
 
 	if (!params.buffer || params.buffer.length < maxDelay) {
 		params.buffer = new Float64Array(maxDelay)

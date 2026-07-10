@@ -101,12 +101,12 @@ for (let buf of stream) phaser(buf, p)
 
 Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 
-**`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in ms (default 3) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
 import { flanger } from '@audio/effect'
 
-let p = { rate: 0.3, depth: 0.7, delay: 3, feedback: 0.5, fs: 44100 }
+let p = { rate: 0.3, depth: 0.7, delay: 0.003, feedback: 0.5, fs: 44100 }
 for (let buf of stream) flanger(buf, p)
 ```
 
@@ -120,12 +120,12 @@ for (let buf of stream) flanger(buf, p)
 
 Multiple detuned delay voices layered over dry signal — ensemble thickening.
 
-**`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in ms (default 20) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
 
 ```js
 import { chorus } from '@audio/effect'
 
-let p = { rate: 1.5, depth: 0.5, delay: 20, voices: 3, fs: 44100 }
+let p = { rate: 1.5, depth: 0.5, delay: 0.02, voices: 3, fs: 44100 }
 for (let buf of stream) chorus(buf, p)
 ```
 
@@ -177,12 +177,12 @@ for (let buf of stream) tremolo(buf, p)
 
 Pitch modulation via modulated delay line — periodic pitch wobble.
 
-**`rate`** LFO rate in Hz (default 5) · **`depth`** delay modulation depth in seconds (default 0.003) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`fs`** sample rate
 
 ```js
 import { vibrato } from '@audio/effect'
 
-let p = { rate: 5, depth: 0.003, fs: 44100 }
+let p = { rate: 5, depth: 0.5, fs: 44100 }
 for (let buf of stream) vibrato(buf, p)
 ```
 

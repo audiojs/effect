@@ -8,32 +8,19 @@ type Live = Record<string, Float32Array | string | boolean>
 type Ctx = { sampleRate: number, maxBlockSize: number, maxChannels: number, currentTime: number, duration?: number, events?: readonly any[], emit?: (name: string, ...args: any[]) => void, [k: string]: unknown }
 type Process = (inputs: Float32Array[][], outputs: Float32Array[][], params: Live) => void
 
-/** Chainable-host options for 'flanger' */
-export interface FlangerOptions {
-  /** 0.02..5 Hz (default 0.3) */
-  "rate"?: Auto
-  /** 0..1 (default 0.7) */
-  "depth"?: Auto
-  /** 0.0001..0.02 s (default 0.003) */
-  "delay"?: Auto
-  /** 0..0.9 (default 0.5) */
-  "feedback"?: Auto
+/** Chainable-host options for 'gain' */
+export interface GainOptions {
+  /** -60..24 dB (default 0) */
+  "dB"?: Auto
   at?: number | string
   duration?: number | string
 }
 
-export declare const flanger: {
+export declare const gain: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: (ctx: { sampleRate: number, params: Live }) => number
   params: {
-    /** 0.02..5 Hz (default 0.3) */
-    "rate": { type: "number", default: 0.3 }
-    /** 0..1 (default 0.7) */
-    "depth": { type: "number", default: 0.7 }
-    /** 0.0001..0.02 s (default 0.003) [restart] */
-    "delay": { type: "number", default: 0.003 }
-    /** 0..0.9 (default 0.5) */
-    "feedback": { type: "number", default: 0.5 }
+    /** -60..24 dB (default 0) */
+    "dB": { type: "number", default: 0 }
   }
 }

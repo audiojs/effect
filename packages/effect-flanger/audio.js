@@ -21,10 +21,10 @@ export const flanger = (ctx) => {
 	}
 }
 flanger.channels = 'any'
-flanger.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return Math.max(0.05, (reps + 1) * 0.02) } // RT60 from live feedback × delay.max(20ms)
+flanger.tail = ({ params }) => { let fb = params.feedback[0]; let reps = fb > 0 ? Math.log(1e-3) / Math.log(fb) : 1; return Math.max(0.05, (reps + 1) * 0.02) } // RT60 from live feedback × delay.max(0.02s)
 flanger.params = {
 	rate:     { type: 'number', min: 0.02, max: 5, default: 0.3, unit: 'Hz', curve: 'log' },
 	depth:    { type: 'number', min: 0, max: 1, default: 0.7 },
-	delay:    { type: 'number', min: 0.1, max: 20, default: 3, unit: 'ms', flags: ['restart'] },
+	delay:    { type: 'number', min: 0.0001, max: 0.02, default: 0.003, unit: 's', flags: ['restart'] },
 	feedback: { type: 'number', min: 0, max: 0.9, default: 0.5 },
 }

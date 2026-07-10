@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-phaser",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Phaser — cascade of swept first-order allpass filters creating moving notches/peaks",
   "type": "module",
   "sideEffects": false,

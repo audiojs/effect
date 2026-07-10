@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-graindelay",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Granular delay — per-grain pitch/time scatter (Ableton Grain Delay class)",
   "type": "module",
   "sideEffects": false,

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-delay",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple delay — mix of dry signal with delayed copy",
   "type": "module",
   "sideEffects": false,

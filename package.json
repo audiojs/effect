@@ -34,9 +34,6 @@
     "type": "git",
     "url": "git+https://github.com/audiojs/effect.git"
   },
-  "devDependencies": {
-    "digital-filter": "file:../../digital-filter"
-  },
   "author": "Dmitry Iv. <dfcreative@gmail.com>",
   "workspaces": [
     "packages/*"

@@ -139,7 +139,7 @@ for (let buf of stream) chorus(buf, p)
 
 Swept resonant bandpass filter — auto (LFO) or fixed frequency mode.
 
-**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth 0–1 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth in octaves, 0–3 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`fs`** sample rate
 
 ```js
 import { wah } from '@audio/effect'

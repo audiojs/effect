@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-subbass",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Psychoacoustic bass enhancer — harmonic synthesis below cutoff (MaxxBass/RBass class)",
   "type": "module",
   "sideEffects": false,
@@ -27,15 +27,18 @@
   "files": [
     "subbass.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "subbass.d.ts"
   ],
   "publishConfig": {
     "access": "public"
   },
+  "types": "subbass.d.ts",
   "audio": "./audio.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/effect.git",
     "directory": "packages/effect-subbass"
-  }
+  },
+  "funding": "https://github.com/sponsors/audiojs"
 }

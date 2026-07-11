@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-rotary",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rotary speaker (Leslie) simulation — split horn/drum rotors, Doppler + directivity AM",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "rotary.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "rotary.d.ts"
   ],
   "dependencies": {
     "@audio/eq-crossover": "^1.0.0",
@@ -47,5 +48,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "rotary.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-multitap",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Multi-tap delay — multiple delay taps at different times and gains",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "multitap.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "multitap.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "multitap.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-sbr",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Spectral band replication — extend HF from midband harmonics (aural exciter family; De-Slop bandwidth recovery)",
   "type": "module",
   "sideEffects": false,
@@ -27,15 +27,18 @@
   "files": [
     "sbr.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "sbr.d.ts"
   ],
   "publishConfig": {
     "access": "public"
   },
+  "types": "sbr.d.ts",
   "audio": "./audio.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/effect.git",
     "directory": "packages/effect-sbr"
-  }
+  },
+  "funding": "https://github.com/sponsors/audiojs"
 }

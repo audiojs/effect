@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-graindelay",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Granular delay — per-grain pitch/time scatter (Ableton Grain Delay class)",
   "type": "module",
   "sideEffects": false,
@@ -27,15 +27,18 @@
   "files": [
     "graindelay.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "graindelay.d.ts"
   ],
   "publishConfig": {
     "access": "public"
   },
+  "types": "graindelay.d.ts",
   "audio": "./audio.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/audiojs/effect.git",
     "directory": "packages/effect-graindelay"
-  }
+  },
+  "funding": "https://github.com/sponsors/audiojs"
 }

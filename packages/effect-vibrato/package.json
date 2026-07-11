@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-vibrato",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Vibrato — pitch modulation via modulated delay line",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "vibrato.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "vibrato.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "vibrato.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-gain",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Gain — simple level adjustment in dB",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "gain.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "gain.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "gain.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

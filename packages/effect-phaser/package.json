@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-phaser",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Phaser — cascade of swept first-order allpass filters creating moving notches/peaks",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "phaser.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "phaser.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "phaser.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-flanger",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Flanger — modulated short delay with feedback",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "flanger.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "flanger.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "flanger.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

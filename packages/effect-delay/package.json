@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-delay",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Simple delay — mix of dry signal with delayed copy",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "delay.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "delay.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "delay.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

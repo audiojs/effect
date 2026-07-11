@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-bitcrusher",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Bitcrusher — sample-rate reduction + bit-depth quantization",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "bitcrusher.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "bitcrusher.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "bitcrusher.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

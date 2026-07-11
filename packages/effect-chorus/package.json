@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-chorus",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Chorus — multiple detuned delay lines for ensemble thickening",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
   "files": [
     "chorus.js",
     "audio.js",
-    "audio.d.ts"
+    "audio.d.ts",
+    "chorus.d.ts"
   ],
   "keywords": [
     "audio",
@@ -41,5 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "audio": "./audio.js"
+  "types": "chorus.d.ts",
+  "audio": "./audio.js",
+  "funding": "https://github.com/sponsors/audiojs"
 }

@@ -15,7 +15,7 @@ Envelope follower drives a resonant bandpass filter — signal level controls th
 **`base`** minimum cutoff Hz (default 300) · **`range`** sweep range Hz (default 3000) · **`Q`** resonance (default 5) · **`attack`** envelope attack seconds (default 0.002) · **`release`** envelope release seconds (default 0.1) · **`sens`** input sensitivity multiplier (default 2) · **`fs`** sample rate
 
 ```js
-import { autoWah } from '@audio/effect'
+import autoWah from '@audio/effect-autowah'
 
 let p = { base: 300, range: 3000, Q: 5, sens: 2, fs: 44100 }
 for (let buf of stream) autoWah(buf, p)

@@ -15,7 +15,7 @@ Cascade of swept allpass filters creating moving notches and peaks.
 **`rate`** LFO rate in Hz (default 0.5) · **`depth`** sweep depth 0–1 (default 0.7) · **`stages`** allpass stages (default 4) · **`feedback`** 0–1 (default 0.5) · **`fc`** center frequency Hz (default 1000) · **`fs`** sample rate
 
 ```js
-import { phaser } from '@audio/effect'
+import phaser from '@audio/effect-phaser'
 
 let p = { rate: 0.5, depth: 0.7, stages: 4, feedback: 0.5, fc: 1000, fs: 44100 }
 for (let buf of stream) phaser(buf, p)

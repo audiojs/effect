@@ -15,7 +15,7 @@ Sums an array of buffers with individual gain multipliers.
 **`channels`** array of `{ buffer, gain }` objects
 
 ```js
-import { mixer } from '@audio/effect'
+import mixer from '@audio/effect-mixer'
 
 let out = mixer([
   { buffer: drums,  gain: 0.8 },

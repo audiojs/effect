@@ -5,7 +5,10 @@
   "sideEffects": false,
   "description": "Audio effects — umbrella for @audio/effect-* atoms (modulation, delay, distortion, utility)",
   "exports": {
-    ".": "./index.js",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -15,7 +18,8 @@
     "publish:all": "npm publish --workspaces && npm publish"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "*.d.ts"
   ],
   "keywords": [
     "audio",
@@ -77,5 +81,6 @@
     "@audio/effect-rotary": "^0.1.0",
     "@audio/effect-tapestop": "^0.1.0"
   },
-  "funding": "https://github.com/sponsors/audiojs"
+  "funding": "https://github.com/sponsors/audiojs",
+  "types": "./index.d.ts"
 }

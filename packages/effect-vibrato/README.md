@@ -15,7 +15,7 @@ Pitch modulation via modulated delay line — periodic pitch wobble.
 **`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`fs`** sample rate
 
 ```js
-import { vibrato } from '@audio/effect'
+import vibrato from '@audio/effect-vibrato'
 
 let p = { rate: 5, depth: 0.5, fs: 44100 }
 for (let buf of stream) vibrato(buf, p)

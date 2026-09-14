@@ -15,7 +15,7 @@ Multiple independent delay taps at different times with individual gains.
 **`taps`** array of `{ time, gain }` objects · **`fs`** sample rate
 
 ```js
-import { multitap } from '@audio/effect'
+import multitap from '@audio/effect-multitap'
 
 let p = {
   taps: [{ time: 0.1, gain: 0.6 }, { time: 0.25, gain: 0.4 }, { time: 0.4, gain: 0.2 }],

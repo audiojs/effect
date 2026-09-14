@@ -15,7 +15,7 @@ Amplitude modulation via LFO — periodic volume pulsing.
 **`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { tremolo } from '@audio/effect'
+import tremolo from '@audio/effect-tremolo'
 
 let p = { rate: 5, depth: 0.7, fs: 44100 }
 for (let buf of stream) tremolo(buf, p)

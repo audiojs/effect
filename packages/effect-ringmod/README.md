@@ -15,7 +15,7 @@ Multiplies signal by a carrier oscillator — produces sum and difference freque
 **`fc`** carrier frequency Hz (default 440) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
 
 ```js
-import { ringMod } from '@audio/effect'
+import ringMod from '@audio/effect-ringmod'
 
 let p = { fc: 300, mix: 1, fs: 44100 }
 for (let buf of stream) ringMod(buf, p)

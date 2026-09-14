@@ -15,7 +15,7 @@ Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 **`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { flanger } from '@audio/effect'
+import flanger from '@audio/effect-flanger'
 
 let p = { rate: 0.3, depth: 0.7, delay: 0.003, feedback: 0.5, fs: 44100 }
 for (let buf of stream) flanger(buf, p)

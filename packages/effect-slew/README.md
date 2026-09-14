@@ -15,7 +15,7 @@ Clips the derivative — limits how fast the signal can change.
 **`rise`** maximum rise rate in units/second (default 1000) · **`fall`** maximum fall rate (default 1000) · **`fs`** sample rate
 
 ```js
-import { slewLimiter } from '@audio/effect'
+import slewLimiter from '@audio/effect-slew'
 
 let p = { rise: 5000, fall: 5000, fs: 44100 }
 for (let buf of stream) slewLimiter(buf, p)

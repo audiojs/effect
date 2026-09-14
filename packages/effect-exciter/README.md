@@ -15,7 +15,7 @@ Aphex-style aural exciter. Extracts the high band via SVF highpass, runs it thro
 **`freq`** highpass cutoff Hz (default 3000) · **`drive`** saturation amount 0–1 (default 0.5, maps to 1–10× gain) · **`amount`** mix-in level 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
-import { exciter } from '@audio/effect'
+import exciter from '@audio/effect-exciter'
 
 let p = { freq: 4000, drive: 0.6, amount: 0.4, fs: 44100 }
 for (let buf of stream) exciter(buf, p)

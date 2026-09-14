@@ -15,7 +15,7 @@ Simple level adjustment in decibels.
 **`dB`** gain in dB (default 0)
 
 ```js
-import { gain } from '@audio/effect'
+import gain from '@audio/effect-gain'
 
 for (let buf of stream) gain(buf, { dB: -6 })
 ```

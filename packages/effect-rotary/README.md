@@ -15,7 +15,7 @@ Leslie cabinet simulation — a treble horn and bass drum spin at independent, i
 **`hornSpeed`**/**`drumSpeed`** rotor rates in Hz (default 0.8/0.7 chorale · 6.7/5.9 tremolo · 0/0 off) · **`crossover`** horn/drum split in Hz (default 800) · **`depth`** modulation intensity 0–1 (default 1) · **`hornInertia`**/**`drumInertia`** spin-up/down time constants in seconds (default 0.6/2.5 — the heavier drum lags the horn) · **`micSpread`** angle between the two virtual mics in radians (default π/2) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
 
 ```js
-import { rotary } from '@audio/effect'
+import rotary from '@audio/effect-rotary'
 
 // mono in, stereo out: pre-fill both channels with the same dry signal
 let left = Float64Array.from(mono), right = Float64Array.from(mono)

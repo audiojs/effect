@@ -15,7 +15,7 @@ Single-sideband frequency shift via Hilbert transform. Every frequency moves by 
 **`shift`** shift in Hz (default 100 · positive = up, negative = down) · **`mix`** wet/dry 0–1 (default 1) · **`taps`** Hilbert FIR length, must be odd (default 65) · **`fs`** sample rate
 
 ```js
-import { frequencyShifter } from '@audio/effect'
+import frequencyShifter from '@audio/effect-freqshift'
 
 let p = { shift: 200, fs: 44100 }
 for (let buf of stream) frequencyShifter(buf, p)

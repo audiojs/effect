@@ -15,7 +15,7 @@ Multiple detuned delay voices layered over dry signal — ensemble thickening.
 **`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
 
 ```js
-import { chorus } from '@audio/effect'
+import chorus from '@audio/effect-chorus'
 
 let p = { rate: 1.5, depth: 0.5, delay: 0.02, voices: 3, fs: 44100 }
 for (let buf of stream) chorus(buf, p)

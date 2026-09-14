@@ -15,7 +15,7 @@ Error-feedback quantization — shapes quantization noise out of the audible ban
 **`bits`** target bit depth (default 16)
 
 ```js
-import { noiseShaping } from '@audio/effect'
+import noiseShaping from '@audio/effect-noiseshaper'
 
 for (let buf of stream) noiseShaping(buf, { bits: 16 })
 ```

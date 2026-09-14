@@ -15,7 +15,7 @@ Sample-rate reduction (zero-order hold) + bit-depth quantization.
 **`bits`** target bit depth 1–24 (default 8) · **`rate`** sample rate ratio 0–1 (default 0.25, quarter rate) · **`fs`** sample rate
 
 ```js
-import { bitcrusher } from '@audio/effect'
+import bitcrusher from '@audio/effect-bitcrusher'
 
 // 8-bit, quarter sample rate (lo-fi)
 let p = { bits: 8, rate: 0.25, fs: 44100 }

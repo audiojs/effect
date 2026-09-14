@@ -15,7 +15,7 @@ Variable-rate playback with a decelerating (or accelerating) read pointer — tu
 **`at`** when the stop/start begins, in seconds (default 0) · **`time`** ramp duration in seconds (default 1) · **`curve`** speed-profile exponent — 1 = physical constant-torque linear decay, >1 = faster initial drop, <1 = held then dropping (default 1) · **`direction`** `'stop'` or `'start'` (default `'stop'`) · **`flutter`** 0–1 random rate wobble during the ramp (default 0)
 
 ```js
-import { tapeStop } from '@audio/effect'
+import tapeStop from '@audio/effect-tapestop'
 
 tapeStop(buf, { at: 2, time: 1.5, direction: 'stop', fs: 44100 })
 ```

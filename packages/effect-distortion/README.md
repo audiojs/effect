@@ -15,7 +15,7 @@ Four waveshaping types: cubic soft clip, hard clip, tanh saturation, and wavefol
 **`drive`** distortion amount 0–1 (default 0.5, maps to 1–10× input gain) · **`type`** `'soft'` | `'hard'` | `'tanh'` | `'foldback'` (default `'soft'`) · **`mix`** wet/dry 0–1 (default 1) · **`fs`** sample rate
 
 ```js
-import { distortion } from '@audio/effect'
+import distortion from '@audio/effect-distortion'
 
 // Soft saturation
 let p = { drive: 0.6, type: 'soft', fs: 44100 }

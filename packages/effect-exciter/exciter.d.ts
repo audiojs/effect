@@ -14,4 +14,4 @@ export interface ExciterOptions {
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the SVF integrator state persists on it (`_lp`, `_bp`).
  */
-export default function exciter(data: Float32Array, params?: ExciterOptions): Float32Array
+export default function exciter<T extends Float32Array | Float64Array>(data: T, params?: ExciterOptions): T

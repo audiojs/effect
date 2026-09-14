@@ -22,4 +22,4 @@ export interface SubbassOptions {
  * object across calls — the sub-extraction and harmonic-band filter state persist
  * on it (`_sub`, `_out`, `_dc`).
  */
-export default function subbass(data: Float32Array, params?: SubbassOptions): Float32Array
+export default function subbass<T extends Float32Array | Float64Array>(data: T, params?: SubbassOptions): T

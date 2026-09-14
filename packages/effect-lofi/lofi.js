@@ -6,7 +6,7 @@
 
 let { sin, tanh, exp, PI } = Math
 
-export default function lofi (data, params) {
+export default function lofi (data, params = {}) {
 	let wow = params.wow ?? 0.3              // 0..1 — slow pitch drift (~0.7 Hz, up to 3 ms)
 	let flutter = params.flutter ?? 0.2      // 0..1 — fast wobble (~7 Hz, up to 0.4 ms)
 	let noise = params.noise ?? 0.1          // 0..1 — hiss bed level

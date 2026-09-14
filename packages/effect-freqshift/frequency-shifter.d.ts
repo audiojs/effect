@@ -19,4 +19,4 @@ export interface FrequencyShifterOptions {
  * oscillator phase persist on it (`_h`, `_buf`, `_p`, `_phase`). Output carries a
  * fixed `(taps - 1) / 2`-sample group delay at every `mix`.
  */
-export default function frequencyShifter(data: Float32Array, params?: FrequencyShifterOptions): Float32Array
+export default function frequencyShifter<T extends Float32Array | Float64Array>(data: T, params?: FrequencyShifterOptions): T

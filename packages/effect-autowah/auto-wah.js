@@ -5,7 +5,7 @@
 
 let {abs, exp, sin, min, PI} = Math
 
-export default function autoWah (data, params) {
+export default function autoWah (data, params = {}) {
 	let base = params.base ?? 300       // minimum cutoff Hz
 	let range = params.range ?? 3000    // sweep range Hz
 	let Q = params.Q ?? 5               // filter resonance

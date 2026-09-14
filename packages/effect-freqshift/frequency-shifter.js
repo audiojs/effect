@@ -21,7 +21,7 @@ function hilbertCoefs (N) {
 	return h
 }
 
-export default function frequencyShifter (data, params) {
+export default function frequencyShifter (data, params = {}) {
 	let shift = params.shift ?? 100      // Hz (+up, -down)
 	let mix   = params.mix   ?? 1        // wet/dry
 	let taps  = params.taps  || 65       // Hilbert FIR length (odd)

@@ -2,8 +2,10 @@
  * Multi-tap delay — multiple delay taps at different times and gains.
  */
 
-export default function multitap (data, params) {
-	let taps = params.taps || [{ time: 0.25, gain: 0.5 }, { time: 0.5, gain: 0.3 }]
+const defaults = [{ time: 0.25, gain: 0.5 }, { time: 0.5, gain: 0.3 }]
+
+export default function multitap (data, params = {}) {
+	let taps = params.taps || defaults
 	let feedback = params.feedback ?? 0
 	let fs = params.fs || 44100
 

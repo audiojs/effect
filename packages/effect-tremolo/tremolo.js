@@ -4,7 +4,7 @@
 
 let {sin, PI} = Math
 
-export default function tremolo (data, params) {
+export default function tremolo (data, params = {}) {
 	let rate = params.rate == null ? 5 : params.rate
 	let depth = params.depth == null ? 0.5 : params.depth
 	let fs = params.fs || 44100

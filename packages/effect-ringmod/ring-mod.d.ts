@@ -12,4 +12,4 @@ export interface RingModOptions {
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the running carrier phase persists on it (`_phase`).
  */
-export default function ringMod(data: Float32Array, params?: RingModOptions): Float32Array
+export default function ringMod<T extends Float32Array | Float64Array>(data: T, params?: RingModOptions): T

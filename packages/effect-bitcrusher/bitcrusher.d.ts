@@ -13,4 +13,4 @@ export interface BitcrusherOptions {
  * object across calls — the held sample and hold-phase counter persist on it
  * (`_held`, `_phase`).
  */
-export default function bitcrusher(data: Float32Array, params?: BitcrusherOptions): Float32Array
+export default function bitcrusher<T extends Float32Array | Float64Array>(data: T, params?: BitcrusherOptions): T

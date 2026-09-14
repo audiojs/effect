@@ -19,4 +19,4 @@ export interface PhaserOptions {
  * object across calls — the allpass cascade state, LFO phase, and feedback sample
  * persist on it (`_ap`, `_phase`, `_fb`).
  */
-export default function phaser(data: Float32Array, params?: PhaserOptions): Float32Array
+export default function phaser<T extends Float32Array | Float64Array>(data: T, params?: PhaserOptions): T

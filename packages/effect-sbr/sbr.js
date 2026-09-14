@@ -14,7 +14,7 @@ function svf (s, x, f, q) {
 	return h                                 // highpass leg
 }
 
-export default function sbr (data, params) {
+export default function sbr (data, params = {}) {
 	let cutoff = params.cutoff ?? 8000       // where the source content dies, Hz
 	let amount = params.amount ?? 0.5        // replication level 0..1
 	let drive = params.drive ?? 0.5

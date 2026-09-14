@@ -17,4 +17,4 @@ export interface ChorusOptions {
  * object across calls — the delay ring buffer, write pointer, and per-voice LFO
  * phases persist on it (`buffer`, `ptr`, `_phases`).
  */
-export default function chorus(data: Float32Array, params?: ChorusOptions): Float32Array
+export default function chorus<T extends Float32Array | Float64Array>(data: T, params?: ChorusOptions): T

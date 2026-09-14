@@ -14,6 +14,8 @@ Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 
 **`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
 
+A zero center delay uses a one-sample feedback ring. Sub-sample ring sizes are clamped to one sample.
+
 ```js
 import flanger from '@audio/effect-flanger'
 

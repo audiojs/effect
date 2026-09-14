@@ -6,7 +6,7 @@
 
 let {sin, tanh, PI} = Math
 
-export default function exciter (data, params) {
+export default function exciter (data, params = {}) {
 	let freq   = params.freq   ?? 3000   // highpass cutoff Hz
 	let drive  = params.drive  ?? 0.5    // saturation 0–1 → 1×–10× gain
 	let amount = params.amount ?? 0.5    // exciter mix 0–1

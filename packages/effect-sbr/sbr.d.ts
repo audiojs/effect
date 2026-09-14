@@ -21,4 +21,4 @@ export interface SbrOptions {
  * object across calls — the source bandpass, output highpass, and envelope-
  * follower state persist on it (`_src`, `_hp1`, `_hp2`, `_env`, `_henv`, `_dc`).
  */
-export default function sbr(data: Float32Array, params?: SbrOptions): Float32Array
+export default function sbr<T extends Float32Array | Float64Array>(data: T, params?: SbrOptions): T

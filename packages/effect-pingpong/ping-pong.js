@@ -3,15 +3,20 @@
  * Takes two channel buffers, modifies both in-place.
  */
 
-export default function pingPong (left, right, params) {
+export default function pingPong (left, right, params = {}) {
+	if (left.length !== right.length) throw new RangeError('channel lengths must match')
 	let time = params.time ?? 0.25
 	let feedback = params.feedback ?? 0.4
 	let mix = params.mix ?? 0.5
-	let fs = params.fs || 44100
+	let fs = params.fs ?? 44100
 
-	let delaySamples = (time * fs) | 0
+	if (!Number.isFinite(time) || time < 0) throw new RangeError('time must be a finite non-negative number of seconds')
+	if (!Number.isFinite(fs) || fs <= 0) throw new RangeError('fs must be a finite positive sample rate')
+	let delaySamples = Math.max(1, Math.floor(time * fs))
+	if (!Number.isSafeInteger(delaySamples)) throw new RangeError('delay length must be a safe integer')
+	if (!left.length) return [left, right]
 
-	if (!params._bufL || params._bufL.length < delaySamples) {
+	if (!params._bufL || params._bufL.length !== delaySamples) {
 		params._bufL = new Float64Array(delaySamples)
 		params._bufR = new Float64Array(delaySamples)
 		params._ptr = 0

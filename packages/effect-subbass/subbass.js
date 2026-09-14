@@ -15,7 +15,7 @@ function svf (s, x, f, q) {
 	return [s.l, s.b, h]
 }
 
-export default function subbass (data, params) {
+export default function subbass (data, params = {}) {
 	let freq = params.freq ?? 80             // sub cutoff, Hz — harmonics built from below here
 	let amount = params.amount ?? 0.5        // harmonic level 0..1
 	let drive = params.drive ?? 0.5          // waveshaper intensity 0..1

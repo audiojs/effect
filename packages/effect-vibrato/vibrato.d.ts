@@ -13,4 +13,4 @@ export interface VibratoOptions {
  * object across calls — the delay ring buffer, write pointer, and LFO phase
  * persist on it (`buffer`, `ptr`, `_phase`).
  */
-export default function vibrato(data: Float32Array, params?: VibratoOptions): Float32Array
+export default function vibrato<T extends Float32Array | Float64Array>(data: T, params?: VibratoOptions): T

@@ -14,6 +14,8 @@ Multiple detuned delay voices layered over dry signal — ensemble thickening.
 
 **`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
 
+A zero center delay is passthrough; sub-sample ring sizes are clamped to one sample.
+
 ```js
 import chorus from '@audio/effect-chorus'
 

@@ -2,7 +2,7 @@
  * Noise shaping — error-feedback dithering for bit-depth reduction.
  */
 
-export default function noiseShaping (data, params) {
+export default function noiseShaping (data, params = {}) {
 	let bits = params.bits || 16
 	let scale = Math.pow(2, bits - 1)
 

@@ -32,7 +32,8 @@ function readDelay (buf, N, ptr, d) {
 	return a + frac * (b - a)
 }
 
-export default function rotary (left, right, params) {
+export default function rotary (left, right, params = {}) {
+	if (left.length !== right.length) throw new RangeError('channel lengths must match')
 	let mix = params.mix == null ? 1 : params.mix
 	if (mix <= 0) return [left, right] // exact bypass — zero latency, nothing to compensate
 

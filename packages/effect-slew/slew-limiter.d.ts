@@ -13,4 +13,4 @@ export interface SlewLimiterOptions {
  * object across calls — the running output sample persists on it (`y`, seeded
  * from `data[0]` on the first call if absent).
  */
-export default function slewLimiter(data: Float32Array, params?: SlewLimiterOptions): Float32Array
+export default function slewLimiter<T extends Float32Array | Float64Array>(data: T, params?: SlewLimiterOptions): T

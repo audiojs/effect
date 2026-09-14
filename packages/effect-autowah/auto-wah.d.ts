@@ -21,4 +21,4 @@ export interface AutoWahOptions {
  * object across calls — the envelope follower and filter state persist on it
  * (`_env`, `_lp`, `_bp`).
  */
-export default function autoWah(data: Float32Array, params?: AutoWahOptions): Float32Array
+export default function autoWah<T extends Float32Array | Float64Array>(data: T, params?: AutoWahOptions): T

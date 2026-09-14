@@ -30,4 +30,4 @@ export interface GraindelayOptions {
  * object across calls — the delay buffer and the two grain heads persist on it
  * (`_buf`, `_w`, `_heads`, `_rnd`).
  */
-export default function grainDelay(data: Float32Array, params?: GraindelayOptions): Float32Array
+export default function grainDelay<T extends Float32Array | Float64Array>(data: T, params?: GraindelayOptions): T

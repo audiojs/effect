@@ -4,7 +4,7 @@
 
 let {pow} = Math
 
-export default function gain (data, params) {
+export default function gain (data, params = {}) {
 	let dB = params.dB ?? 0
 	let g = pow(10, dB / 20)
 

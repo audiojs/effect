@@ -12,4 +12,4 @@ export interface DistortionOptions {
  * Mutates `data` in place and returns the same reference. Stateless per-sample
  * transfer curve — no state persists between calls.
  */
-export default function distortion(data: Float32Array, params?: DistortionOptions): Float32Array
+export default function distortion<T extends Float32Array | Float64Array>(data: T, params?: DistortionOptions): T

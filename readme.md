@@ -34,44 +34,34 @@ npm install @audio/effect
 ```
 
 ```js
-// import everything
-import * as fx from '@audio/effect'
+import { delay } from '@audio/effect'
 
-// pick what you need
-import { phaser, flanger, chorus, wah, autoWah, ringMod, frequencyShifter } from '@audio/effect'
-import { delay, multitap, pingPong }                            from '@audio/effect'
-import { distortion, exciter, bitcrusher }                      from '@audio/effect'
-import { gain, mixer, slewLimiter, noiseShaping }               from '@audio/effect'
-
-// sibling families
-import { compressor, limiter, gate, envelope, expander }        from '@audio/dynamics'
-import { stereoWidener, haas, panner, autoPanner }              from '@audio/spatial'
-import { freeverb, dattorro, convolve }                         from '@audio/reverb'
+const fs = 48000
+const input = new Float32Array(14401)
+input[0] = 1 // impulse; replace with mono PCM samples
+const params = { time: 0.1, feedback: 0.5, mix: 0.5, fs }
+const output = delay(input.slice(), params)
+console.log(output[0], output[4800], output[9600]) // 0.5, 0.5, 0.25
 ```
 
+For one effect: `npm install @audio/effect-delay`, then `import delay from '@audio/effect-delay'`. The umbrella re-exports the same functions and types. Sibling families such as `@audio/dynamics`, `@audio/spatial` and `@audio/reverb` are separate installations.
 
 ## API
 
-All effects share one shape:
+| Operation | Input/output | State |
+|---|---|---|
+| Mono effects, such as `gain`, `delay`, `chorus` | `effect(buffer, params?)` modifies and returns that same buffer. | Reuse one params object across chunks to continue history. |
+| `pingPong`, `rotary` | `effect(left, right, params?)` modifies both and returns `[left, right]`. | Equal channel lengths required (otherwise RangeError). One params object per stereo instance. Rotary averages its inputs to mono before producing stereo. |
+| `mixer` | `mixer([{ buffer, gain }, ...])` returns a new Float64Array; inputs remain unchanged. | Stateless; empty input returns an empty buffer. Unequal lengths throw RangeError. |
+| `tapeStop` | Modifies and returns its buffer. | Whole-buffer operation; do not split it into streaming chunks. |
 
-```js
-effect(buffer, params)   // → buffer (modified in-place)
-```
+PCM buffers may be Float32Array or Float64Array; TypeScript preserves the supplied array type in the return value. Omitted options (or `undefined`) create fresh defaults for that call. For continuous processing, keep the same mutable options object; use a fresh object with the same settings to reset. Keep separate state for separate channels unless the function explicitly takes a stereo pair. Do not pass `null` as the options object.
 
-Takes a `Float32Array`/`Float64Array`, modifies it in-place, returns it. Pass the same params object on every call — internal state (`_phase`, `_env`, etc.) persists across blocks automatically:
+For example, after the complete example above, `delay(nextChunk, params)` continues its echo history. Passing `nextChunk.slice()` preserves the original samples. Further examples using `data`, `stream` or `stereoStream` are fragments that expect your audio input.
 
-```js
-let params = { rate: 1, depth: 0.7, fc: 1000, fs: 44100 }
-for (let buf of stream) phaser(buf, params)
-```
+`fs` is sample rate in Hz, default 44100. Time/delay and envelope attack/release in this family are seconds; LFO/carrier frequencies are Hz; mix/depth and feedback are linear ratios. `gain.dB` is decibels. Check individual options for exceptions such as semitones, sample counts and slew rates. Dynamics is a separate API and uses milliseconds for attack/release.
 
-Spatial effects take two channels and return `[left, right]`:
-
-```js
-stereoWidener(left, right, { width: 1.5 })   // → [left, right]
-haas(left, right, { time: 0.02, fs: 44100 }) // → [left, right]
-panner(left, right, { pan: -0.5 })           // → [left, right]
-```
+The leaf `/audio` exports are host processor factories. Their parameter metadata can limit ranges, smooth controls, or mark changes as requiring a restart. The direct buffer functions do not automatically smooth arbitrary parameter changes. A delay-time restart discards its tail and can click; it is not a pitch-gliding tape-delay control.
 
 
 ## Modulation
@@ -103,6 +93,8 @@ Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 
 **`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
 
+A zero center delay uses a one-sample feedback ring. Sub-sample ring sizes are clamped to one sample.
+
 ```js
 import { flanger } from '@audio/effect'
 
@@ -121,6 +113,8 @@ for (let buf of stream) flanger(buf, p)
 Multiple detuned delay voices layered over dry signal — ensemble thickening.
 
 **`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
+
+A zero center delay is passthrough; sub-sample ring sizes are clamped to one sample.
 
 ```js
 import { chorus } from '@audio/effect'
@@ -285,7 +279,7 @@ for (let buf of stream) autoWah(buf, p)
 
 ## Dynamics
 
-Dynamics processing lives in [@audio/dynamics](https://github.com/audiojs/dynamics) — compressor, limiter, gate, expander, deesser, ducker, softclip, compand, multiband, character models (fet/opto/vca/varimu), leveler. See its README for the accurate API (note: dynamics kernels read `sampleRate`, not `fs`, and attack/release are in ms).
+Dynamics processing lives in [@audio/dynamics](https://github.com/audiojs/dynamics) — compressor, limiter, gate, expander, deesser, ducker, softclip, compand, multiband, character models (fet/opto/vca/varimu), leveler. See its README for the accurate API (sample-rate keys vary by processor; attack/release are in ms).
 
 
 ## Delay
@@ -294,18 +288,25 @@ Time-based echo and reverberation effects.
 
 ### Delay
 
-Simple delay — dry signal mixed with delayed copy and optional feedback.
+Simple causal delay — dry signal mixed with delayed copy and optional feedback.
 
-**`time`** delay time in seconds (default 0.25) · **`feedback`** echo decay 0–1 (default 0.3) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** sample rate
+**`time`** non-negative seconds (default 0.25) · **`feedback`** gain per repeat (default 0.3) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** positive sample rate in Hz (default 44100)
 
 ```js
 import { delay } from '@audio/effect'
 
-let p = { time: 0.25, feedback: 0.4, mix: 0.5, fs: 44100 }
-for (let buf of stream) delay(buf, p)
+const input = new Float32Array(14401)
+input[0] = 1
+const p = { time: 0.1, feedback: 0.5, mix: 0.5, fs: 48000 }
+const output = delay(input, p)
+console.log(output === input, output[4800], output[9600]) // true, 0.5, 0.25
 ```
 
-**Use when**: slap-back echo, rhythmic delays, tape delay emulation<br>
+Time is quantized to `max(1, floor(time * fs))` samples: zero and sub-sample times use one sample, keeping the feedback loop causal. Changing this effective length resets buffered history, including when shrinking it or changing `fs`; unchanged length preserves history. Empty buffers do not advance or reset the line. Non-finite/negative time or non-finite/non-positive `fs` throws RangeError before modifying input/state.
+
+Keep `abs(feedback) < 1` for a decaying tail; the direct function does not clamp feedback or mix. Reuse `p` across chunks, including silence to drain echoes, and use a fresh options object to reset. The `/audio` factory limits feedback to 0–0.95 and time to 0.001–4 seconds; time changes restart it. Its `tail(ctx)` estimates decay by 60 dB at the supplied settings, rather than imposing a fixed eight-second limit. This is not exact silence; hosts that evaluate tails once must account for later feedback automation. Disconnected inputs are processed as silence so existing tails drain.
+
+**Use when**: slap-back echo, rhythmic delays<br>
 **Not for**: diffuse reverberation (use reverb)
 
 <!-- ![Delay](plot/delay.svg) -->
@@ -337,7 +338,7 @@ for (let buf of stream) multitap(buf, p)
 
 Cross-fed stereo delay — left echo bounces to right, right to left.
 
-**`time`** delay time in seconds (default 0.25) · **`feedback`** 0–1 (default 0.3) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** sample rate
+**`time`** non-negative seconds (default 0.25) · **`feedback`** gain per repeat (default 0.4) · **`mix`** wet/dry 0–1 (default 0.5) · **`fs`** positive sample rate in Hz (default 44100)
 
 ```js
 import { pingPong } from '@audio/effect'
@@ -345,6 +346,10 @@ import { pingPong } from '@audio/effect'
 let p = { time: 0.15, feedback: 0.5, mix: 0.5, fs: 44100 }
 for (let [L, R] of stereoStream) pingPong(L, R, p)
 ```
+
+Both channels must have equal lengths; a mismatch throws before processing. Delay time uses `max(1, floor(time * fs))` samples. Changing the effective length resets both rings; empty channels do not advance or reset them. Reuse one params object for successive stereo chunks, or create a fresh one to reset. Time and sample-rate validation match the mono delay. Keep `abs(feedback) < 1` for decay; the direct function does not clamp it.
+
+The `/audio` factory limits feedback to 0–0.9 and time to 0.01–2 seconds. Time changes restart it. Its tail estimate describes 60 dB decay at the supplied settings, not a hard silence boundary; disconnected inputs drain through silent blocks.
 
 **Use when**: stereo width from delays, spatial depth, rhythmic bounce effects<br>
 **Not for**: mono output
@@ -548,7 +553,7 @@ for (let buf of stream) gain(buf, { dB: -6 })
 
 Sums an array of buffers with individual gain multipliers.
 
-**`channels`** array of `{ buffer, gain }` objects
+**`inputs`** array of `{ buffer, gain }` objects
 
 ```js
 import { mixer } from '@audio/effect'
@@ -559,6 +564,8 @@ let out = mixer([
   { buffer: synth,  gain: 0.5 },
 ])
 ```
+
+Returns a fresh Float64Array and leaves inputs unchanged. `mixer([])` returns an empty buffer. All input buffers must have equal lengths; otherwise it throws RangeError before summing.
 
 **Use when**: combining signals, bus summing, stem mixing
 

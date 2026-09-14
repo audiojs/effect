@@ -8,7 +8,8 @@ export interface MixerInput {
 
 /**
  * Mixer — sums `inputs` (each `{ buffer, gain }`) into a new `Float64Array` the
- * length of `inputs[0].buffer`. Unlike every other effect atom, this does NOT
+ * length of `inputs[0].buffer` (zero for an empty input list).
+ * All buffers must have equal lengths; otherwise throws RangeError. Unlike every other effect atom, this does NOT
  * mutate any input buffer and does NOT return the same reference — it allocates
  * and returns a fresh buffer. `params` is accepted for signature parity with the
  * rest of the family but is currently unused.

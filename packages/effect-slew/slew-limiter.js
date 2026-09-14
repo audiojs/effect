@@ -3,7 +3,7 @@
  * Nonlinear — clips the derivative. Prevents clicks, smooths control signals.
  */
 
-export default function slewLimiter (data, params) {
+export default function slewLimiter (data, params = {}) {
 	let rise = params.rise || 1000
 	let fall = params.fall || 1000
 	let fs = params.fs || 44100

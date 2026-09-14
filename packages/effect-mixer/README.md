@@ -12,7 +12,7 @@ import mixer from '@audio/effect-mixer'
 
 Sums an array of buffers with individual gain multipliers.
 
-**`channels`** array of `{ buffer, gain }` objects
+**`inputs`** array of `{ buffer, gain }` objects
 
 ```js
 import mixer from '@audio/effect-mixer'
@@ -23,6 +23,8 @@ let out = mixer([
   { buffer: synth,  gain: 0.5 },
 ])
 ```
+
+Returns a fresh Float64Array and leaves inputs unchanged. `mixer([])` returns an empty buffer. All input buffers must have equal lengths; otherwise it throws RangeError before summing.
 
 **Use when**: combining signals, bus summing, stem mixing
 

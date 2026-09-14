@@ -19,4 +19,4 @@ export interface WahOptions {
  * object across calls — the filter state and LFO phase persist on it (`_lp`,
  * `_bp`, `_phase`).
  */
-export default function wah(data: Float32Array, params?: WahOptions): Float32Array
+export default function wah<T extends Float32Array | Float64Array>(data: T, params?: WahOptions): T

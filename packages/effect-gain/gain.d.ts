@@ -8,4 +8,4 @@ export interface GainOptions {
  * Mutates `data` in place and returns the same reference. Stateless per-sample
  * scale — no state persists between calls.
  */
-export default function gain(data: Float32Array, params?: GainOptions): Float32Array
+export default function gain<T extends Float32Array | Float64Array>(data: T, params?: GainOptions): T

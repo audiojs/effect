@@ -4,7 +4,7 @@
 
 let {sin, PI} = Math
 
-export default function ringMod (data, params) {
+export default function ringMod (data, params = {}) {
 	let fc = params.fc || 440
 	let fs = params.fs || 44100
 	let mix = params.mix == null ? 1 : params.mix

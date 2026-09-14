@@ -4,14 +4,14 @@
 
 let {sin, floor, PI} = Math
 
-export default function chorus (data, params) {
+export default function chorus (data, params = {}) {
 	let rate = params.rate == null ? 1.5 : params.rate
 	let depth = params.depth == null ? 0.5 : params.depth
 	let delay = params.delay == null ? 0.02 : params.delay  // seconds
 	let voices = Math.max(1, (params.voices || 3) | 0)  // integer ≥ 1 — wet/voices below
 	let fs = params.fs || 44100
 
-	let maxDelay = (delay * 2 * fs) | 0
+	let maxDelay = Math.max(1, Math.floor(delay * 2 * fs))
 	let delaySamples = delay * fs
 
 	if (!params.buffer || params.buffer.length < maxDelay) {

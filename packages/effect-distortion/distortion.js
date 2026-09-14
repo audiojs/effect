@@ -5,7 +5,7 @@
 
 let {abs, sign, tanh, min, max} = Math
 
-export default function distortion (data, params) {
+export default function distortion (data, params = {}) {
 	let drive = params.drive ?? 0.5    // distortion amount (0–1)
 	let type = params.type || 'soft'   // 'soft' | 'hard' | 'tanh' | 'foldback'
 	let mix = params.mix ?? 1          // wet/dry

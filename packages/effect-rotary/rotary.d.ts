@@ -46,6 +46,7 @@ export interface RotaryOptions {
 }
 
 /**
+ * Channel lengths must match; otherwise throws RangeError before processing.
  * Mutates `left` and `right` in place and returns `[left, right]` (the same two
  * references). Pass the same params object across calls — the crossover filter
  * state, per-rotor delay rings, phases, and inertia-glided rates persist on it
@@ -54,8 +55,8 @@ export interface RotaryOptions {
  * `hornSpeed`/`drumSpeed`/`speed` mid-stream glides through the inertia model
  * instead of snapping.
  */
-export default function rotary(
-  left: Float32Array,
-  right: Float32Array,
+export default function rotary<L extends Float32Array | Float64Array, R extends Float32Array | Float64Array>(
+  left: L,
+  right: R,
   params?: RotaryOptions
-): [Float32Array, Float32Array]
+): [L, R]

@@ -4,7 +4,9 @@
  */
 
 export default function mixer (inputs, params = {}) {
-	let len = inputs[0].buffer.length
+	let len = inputs.length ? inputs[0].buffer.length : 0
+	for (let input of inputs)
+		if (input.buffer.length !== len) throw new RangeError('buffer lengths must match')
 	let out = new Float64Array(len)
 
 	for (let input of inputs) {

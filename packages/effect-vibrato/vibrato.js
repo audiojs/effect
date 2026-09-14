@@ -11,7 +11,7 @@ let {sin, floor, PI} = Math
 // directly at implicit full modulation (× 1.0); 0.003s × 1.0 ≙ 0.5 × maxSwing ⇒ maxSwing = 0.006s.
 const maxSwing = 0.006
 
-export default function vibrato (data, params) {
+export default function vibrato (data, params = {}) {
 	let rate = params.rate == null ? 5 : params.rate
 	let depth = params.depth == null ? 0.5 : params.depth   // 0..1
 	let fs = params.fs || 44100

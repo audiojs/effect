@@ -25,4 +25,4 @@ export interface MultitapOptions {
  * object across calls — the delay ring buffer, write pointer, and resolved tap
  * offsets persist on it (`buffer`, `ptr`, `_taps`, `_fs`, `_tapSamples`, `_maxDelay`).
  */
-export default function multitap(data: Float32Array, params?: MultitapOptions): Float32Array
+export default function multitap<T extends Float32Array | Float64Array>(data: T, params?: MultitapOptions): T

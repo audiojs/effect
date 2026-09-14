@@ -4,7 +4,7 @@
 
 let {sin, tan, PI} = Math
 
-export default function phaser (data, params) {
+export default function phaser (data, params = {}) {
 	let rate = params.rate == null ? 0.5 : params.rate
 	let depth = params.depth == null ? 0.7 : params.depth
 	let stages = (params.stages || 4) | 0

@@ -22,4 +22,4 @@ export interface StutterOptions {
  * object across calls — the captured slice buffer and cycle position persist on
  * it (`_slice`, `_pos`).
  */
-export default function stutter(data: Float32Array, params?: StutterOptions): Float32Array
+export default function stutter<T extends Float32Array | Float64Array>(data: T, params?: StutterOptions): T

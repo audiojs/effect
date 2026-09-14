@@ -1,7 +1,6 @@
 // atom manifest — wraps the chorus atom; state rides per-channel params objects.
-// `delay`/`voices` size the buffer at construction (flags: restart — voices also sidesteps
-// a kernel gap: _phases isn't resized when voices grows without delay also growing);
-// rate/depth are live.
+// `delay`/`voices` are construction settings (flags: restart); rate/depth are live.
+// The direct kernel also resizes its phase array when voices changes.
 
 import chorusFn from './chorus.js'
 

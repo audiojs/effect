@@ -23,7 +23,7 @@ export interface DelayOptions {
 export declare const delay: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 8
+  tail: (ctx: { sampleRate: number, params: Live }) => number
   params: {
     /** 0.001..4 s (default 0.25) [restart] */
     "time": { type: "number", default: 0.25 }

@@ -17,4 +17,4 @@ export interface FlangerOptions {
  * object across calls — the delay ring buffer, write pointer, and LFO phase
  * persist on it (`buffer`, `ptr`, `_phase`).
  */
-export default function flanger(data: Float32Array, params?: FlangerOptions): Float32Array
+export default function flanger<T extends Float32Array | Float64Array>(data: T, params?: FlangerOptions): T

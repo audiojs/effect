@@ -30,4 +30,4 @@ export interface LofiOptions {
  * object across calls — delay-line, LFO phase, filter, and noise state persist on
  * it (`_buf`, `_ph1`, `_ph2`, `_lp1`..`_lp3`, `_hp`, `_rnd`, `_crk`).
  */
-export default function lofi(data: Float32Array, params?: LofiOptions): Float32Array
+export default function lofi<T extends Float32Array | Float64Array>(data: T, params?: LofiOptions): T

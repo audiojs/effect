@@ -6,7 +6,7 @@
 
 let { sin, cos, PI } = Math
 
-export default function graindelay (data, params) {
+export default function graindelay (data, params = {}) {
 	let time = params.time ?? 0.25           // base delay, s
 	let spray = params.spray ?? 0.02         // random extra delay per grain, s
 	let pitch = params.pitch ?? 0            // semitones, per-grain transposition

@@ -12,4 +12,4 @@ export interface TremoloOptions {
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the running LFO phase persists on it (`_phase`).
  */
-export default function tremolo(data: Float32Array, params?: TremoloOptions): Float32Array
+export default function tremolo<T extends Float32Array | Float64Array>(data: T, params?: TremoloOptions): T

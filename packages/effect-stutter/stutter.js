@@ -4,7 +4,7 @@
  * decay attenuates successive repeats; mix blends against the uninterrupted dry.
  */
 
-export default function stutter (data, params) {
+export default function stutter (data, params = {}) {
 	let interval = params.interval ?? 0.5    // capture cycle, s
 	let slice = params.slice ?? 0.125        // captured slice length, s
 	let decay = params.decay ?? 0            // 0..1 amplitude loss per repeat

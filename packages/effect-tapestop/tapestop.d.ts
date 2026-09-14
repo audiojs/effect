@@ -27,4 +27,4 @@ export interface TapestopOptions {
  * the read-pointer integration spans the full buffer, so it needs the complete
  * signal in one call, not a per-block stream; no state persists across calls.
  */
-export default function tapeStop(data: Float32Array, options?: TapestopOptions): Float32Array
+export default function tapeStop<T extends Float32Array | Float64Array>(data: T, options?: TapestopOptions): T

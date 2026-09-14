@@ -4,7 +4,7 @@
 
 let {round, pow} = Math
 
-export default function bitcrusher (data, params) {
+export default function bitcrusher (data, params = {}) {
 	let bits = params.bits ?? 8        // target bit depth (1–24)
 	let rate = params.rate ?? 0.25     // sample rate ratio: 1 = full, 0.25 = quarter rate
 	let fs = params.fs || 44100

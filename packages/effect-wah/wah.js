@@ -4,7 +4,7 @@
 
 let {sin, pow, PI} = Math
 
-export default function wah (data, params) {
+export default function wah (data, params = {}) {
 	let rate = params.rate == null ? 1.5 : params.rate
 	let depth = params.depth == null ? 0.8 : params.depth
 	let fc = params.fc || 1000

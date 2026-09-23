@@ -11,7 +11,7 @@ export const sbr = (ctx) => {
 		if (!inp || !inp.length) return
 		for (let c = 0; c < inp.length; c++) {
 			const p = chP[c]
-			p.cutoff = params.cutoff[0]
+			p.fc = params.fc[0]
 			p.amount = params.amount[0]
 			p.drive = params.drive[0]
 			out[c].set(inp[c])
@@ -21,7 +21,7 @@ export const sbr = (ctx) => {
 }
 sbr.channels = 'any'
 sbr.params = {
-	cutoff: { type: 'number', min: 2000, max: 16000, default: 8000, unit: 'Hz', curve: 'log' },
+	fc:     { type: 'number', min: 2000, max: 16000, default: 8000, unit: 'Hz', curve: 'log', alias: 'cutoff' },
 	amount: { type: 'number', min: 0, max: 1, default: 0.5 },
 	drive:  { type: 'number', min: 0, max: 1, default: 0.5 },
 }

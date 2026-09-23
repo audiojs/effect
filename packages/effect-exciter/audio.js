@@ -11,7 +11,7 @@ export const exciter = (ctx) => {
 		if (!inp || !inp.length) return
 		for (let c = 0; c < inp.length; c++) {
 			const p = chP[c]
-			p.freq = params.freq[0]
+			p.fc = params.fc[0]
 			p.drive = params.drive[0]
 			p.amount = params.amount[0]
 			out[c].set(inp[c])
@@ -21,7 +21,7 @@ export const exciter = (ctx) => {
 }
 exciter.channels = 'any'
 exciter.params = {
-	freq:   { type: 'number', min: 500, max: 8000, default: 3000, unit: 'Hz', curve: 'log' },
+	fc:     { type: 'number', min: 500, max: 8000, default: 3000, unit: 'Hz', curve: 'log', alias: 'freq' },
 	drive:  { type: 'number', min: 0, max: 1, default: 0.5 },
 	amount: { type: 'number', min: 0, max: 1, default: 0.5 },
 }

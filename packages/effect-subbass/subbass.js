@@ -16,7 +16,7 @@ function svf (s, x, f, q) {
 }
 
 export default function subbass (data, params = {}) {
-	let freq = params.freq ?? 80             // sub cutoff, Hz — harmonics built from below here
+	let fc = params.fc ?? params.freq ?? 80  // sub cutoff, Hz — harmonics built from below here (`freq`: former name)
 	let amount = params.amount ?? 0.5        // harmonic level 0..1
 	let drive = params.drive ?? 0.5          // waveshaper intensity 0..1
 	let keep = params.keep ?? 1              // how much original sub to keep (0 = replace)
@@ -27,8 +27,8 @@ export default function subbass (data, params = {}) {
 		params._out = { l: 0, b: 0 }           // harmonic band BP
 		params._dc = 0
 	}
-	let f1 = 2 * sin(PI * Math.min(freq, fs / 4) / fs)
-	let f2 = 2 * sin(PI * Math.min(freq * 2.5, fs / 4) / fs)
+	let f1 = 2 * sin(PI * Math.min(fc, fs / 4) / fs)
+	let f2 = 2 * sin(PI * Math.min(fc * 2.5, fs / 4) / fs)
 	let g = 1 + drive * 6
 	let aDc = 1 - Math.exp(-2 * PI * 10 / fs)
 
@@ -39,7 +39,7 @@ export default function subbass (data, params = {}) {
 		let h = tanh(sub * g) * 0.6 + Math.abs(sub) * g * 0.4
 		params._dc += aDc * (h - params._dc)   // DC-block the rectifier output
 		h -= params._dc
-		// keep harmonics in the speaker-friendly band around 2–5× freq
+		// keep harmonics in the speaker-friendly band around 2–5× fc
 		svf(params._out, h, f2, 0.8)
 		let harm = params._out.b               // bandpass output
 		data[i] = x - (1 - keep) * sub + amount * 2 * harm

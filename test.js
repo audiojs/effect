@@ -334,6 +334,18 @@ test('noiseShaping — quantizes to target bit depth', () => {
 	ok(allQuantized, 'all samples quantized to 8-bit grid')
 })
 
+test('noiseShaping — error stays within one step and is pushed toward Nyquist', () => {
+	for (let bits of [1, 4, 8]) {
+		let x = sine(100, 8192), step = 1 / 2 ** (bits - 1)
+		for (let i = 0; i < x.length; i++) x[i] *= 0.45
+		let y = fx.noiseShaping(Float32Array.from(x), { bits }), e = y.map((v, i) => v - x[i])
+		ok(e.every(v => Math.abs(v) <= step + 1e-9), `${bits} bits: |error| ≤ one step`)
+		let lo = 0, hi = 0
+		for (let i = 1; i < e.length; i++) { lo += (e[i] + e[i - 1]) ** 2; hi += (e[i] - e[i - 1]) ** 2 }
+		ok(hi > lo * 2, `${bits} bits: error energy above fs/4 exceeds below (×${(hi / lo).toFixed(1)})`)
+	}
+})
+
 test('gain — amplifies signal', () => {
 	let data = dc(64, 0.5)
 	fx.gain(data, { dB: 6 })
@@ -464,7 +476,7 @@ test('autoWah — louder input drives envelope higher', () => {
 test('exciter — amount=0 is passthrough', () => {
 	let data = sine(440, 4096)
 	let orig = Float64Array.from(data)
-	fx.exciter(data, { amount: 0, freq: 3000, drive: 0.5, fs: 44100 })
+	fx.exciter(data, { amount: 0, fc: 3000, drive: 0.5, fs: 44100 })
 	let maxErr = 0
 	for (let i = 0; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxErr) maxErr = d }
 	ok(maxErr < 1e-10, `exciter amount=0 passthrough: err=${maxErr}`)
@@ -473,7 +485,7 @@ test('exciter — amount=0 is passthrough', () => {
 test('exciter — adds harmonics on high-band input', () => {
 	let data = sine(4000, 4096)
 	let orig = Float64Array.from(data)
-	fx.exciter(data, { amount: 0.8, freq: 2000, drive: 0.8, fs: 44100 })
+	fx.exciter(data, { amount: 0.8, fc: 2000, drive: 0.8, fs: 44100 })
 	let maxDiff = 0
 	for (let i = 2048; i < data.length; i++) { let d = Math.abs(data[i] - orig[i]); if (d > maxDiff) maxDiff = d }
 	ok(maxDiff > 0.01, `exciter modifies high-band: maxDiff=${maxDiff.toFixed(3)}`)
@@ -593,7 +605,7 @@ test('subbass — generates low-mid harmonics from a 60 Hz sub', () => {
 	let n = 44100, d = new Float64Array(n)
 	for (let i = 0; i < n; i++) d[i] = 0.7 * Math.sin(2 * Math.PI * 60 * i / 44100)
 	let h2dry = goertzel(d, 120), h3dry = goertzel(d, 180)
-	fx.subbass(d, { freq: 80, amount: 0.8, drive: 0.7, fs: 44100 })
+	fx.subbass(d, { fc: 80, amount: 0.8, drive: 0.7, fs: 44100 })
 	ok(goertzel(d, 120) > h2dry * 3 || goertzel(d, 180) > h3dry * 3, 'harmonic series appears')
 	ok(d.every(isFinite))
 })
@@ -603,7 +615,7 @@ test('sbr — regenerates content above the cutoff', () => {
 	// program dies at 4 kHz (simulated lossy ceiling): 3 kHz tone only
 	for (let i = 0; i < n; i++) d[i] = 0.6 * Math.sin(2 * Math.PI * 3000 * i / 44100)
 	let above = goertzel(d, 6000)
-	fx.sbr(d, { cutoff: 4000, amount: 0.8, drive: 0.7, fs: 44100 })
+	fx.sbr(d, { fc: 4000, amount: 0.8, drive: 0.7, fs: 44100 })
 	ok(goertzel(d, 6000) > above * 5 + 1e-6, 'harmonics land above cutoff')
 	almost(goertzel(d, 3000) / 0.3, 1, 0.15)  // program band substantially intact
 	ok(d.every(isFinite))
@@ -787,4 +799,12 @@ test('tapestop — length preserved, no NaN/Inf', () => {
 	fx.tapeStop(data, { at: 0.2, time: 0.5, flutter: 0.3, fs })
 	ok(data.length === N, 'length preserved')
 	ok(data.every(Number.isFinite), 'no NaN/Inf')
+})
+
+test('renamed options — exciter/subbass `freq` and sbr `cutoff` still work as `fc`', () => {
+	for (let [name, old, fc] of [['exciter', 'freq', 2500], ['subbass', 'freq', 90], ['sbr', 'cutoff', 6000]]) {
+		let x = Float32Array.from({ length: 4096 }, (_, i) => 0.4 * Math.sin(i * 0.05) + 0.2 * Math.sin(i * 0.9))
+		let a = fx[name](Float32Array.from(x), { fc, fs: 44100 }), b = fx[name](Float32Array.from(x), { [old]: fc, fs: 44100 })
+		ok(a.every((v, i) => v === b[i]), `${name}: { ${old} } ≡ { fc }`)
+	}
 })

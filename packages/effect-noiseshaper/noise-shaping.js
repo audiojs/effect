@@ -12,8 +12,10 @@ export default function noiseShaping (data, params = {}) {
 	for (let i = 0; i < data.length; i++) {
 		let x = data[i] + fb
 		let q = Math.round(x * scale) / scale
-		let err = q - data[i]
-		fb = -err
+		// feed back the quantizer's own error: the output error is then e[n] − e[n−1],
+		// bounded by one step and shaped toward Nyquist (measuring it against the input
+		// fed the correction back into itself: it random-walked, 19× full scale at 1 bit)
+		fb = x - q
 		data[i] = q
 	}
 

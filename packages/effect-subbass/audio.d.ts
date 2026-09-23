@@ -11,6 +11,8 @@ type Process = (inputs: Float32Array[][], outputs: Float32Array[][], params: Liv
 /** Chainable-host options for 'subbass' */
 export interface SubbassOptions {
   /** 30..200 Hz (default 80) */
+  "fc"?: Auto
+  /** @deprecated former name of "fc" */
   "freq"?: Auto
   /** 0..1 (default 0.5) */
   "amount"?: Auto
@@ -27,7 +29,7 @@ export declare const subbass: {
   channels: "any"
   params: {
     /** 30..200 Hz (default 80) */
-    "freq": { type: "number", default: 80 }
+    "fc": { type: "number", default: 80, alias: "freq" }
     /** 0..1 (default 0.5) */
     "amount": { type: "number", default: 0.5 }
     /** 0..1 (default 0.5) */

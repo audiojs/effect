@@ -11,7 +11,7 @@ export const subbass = (ctx) => {
 		if (!inp || !inp.length) return
 		for (let c = 0; c < inp.length; c++) {
 			const p = chP[c]
-			p.freq = params.freq[0]
+			p.fc = params.fc[0]
 			p.amount = params.amount[0]
 			p.drive = params.drive[0]
 			p.keep = params.keep[0]
@@ -22,7 +22,7 @@ export const subbass = (ctx) => {
 }
 subbass.channels = 'any'
 subbass.params = {
-	freq:   { type: 'number', min: 30, max: 200, default: 80, unit: 'Hz', curve: 'log' },
+	fc:     { type: 'number', min: 30, max: 200, default: 80, unit: 'Hz', curve: 'log', alias: 'freq' },
 	amount: { type: 'number', min: 0, max: 1, default: 0.5 },
 	drive:  { type: 'number', min: 0, max: 1, default: 0.5 },
 	keep:   { type: 'number', min: 0, max: 1, default: 1 },

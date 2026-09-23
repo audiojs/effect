@@ -1,12 +1,14 @@
 /**
  * Spectral band replication (aural-exciter family) — takes the top octave still
- * present below `cutoff`, regenerates its harmonic series with a waveshaper
- * (harmonics land above `cutoff`), highpasses at `cutoff`, and mixes back in at a
+ * present below `fc`, regenerates its harmonic series with a waveshaper
+ * (harmonics land above `fc`), highpasses at `fc`, and mixes back in at a
  * level tracking the source band's envelope. Recovers HF lost to lossy encoding
  * or a lowpassed source.
  */
 export interface SbrOptions {
   /** where the source content dies, Hz, default 8000 */
+  fc?: number
+  /** @deprecated former name of `fc` */
   cutoff?: number
   /** replication level, 0–1, default 0.5 */
   amount?: number

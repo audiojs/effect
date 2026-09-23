@@ -11,6 +11,8 @@ type Process = (inputs: Float32Array[][], outputs: Float32Array[][], params: Liv
 /** Chainable-host options for 'sbr' */
 export interface SbrOptions {
   /** 2000..16000 Hz (default 8000) */
+  "fc"?: Auto
+  /** @deprecated former name of "fc" */
   "cutoff"?: Auto
   /** 0..1 (default 0.5) */
   "amount"?: Auto
@@ -25,7 +27,7 @@ export declare const sbr: {
   channels: "any"
   params: {
     /** 2000..16000 Hz (default 8000) */
-    "cutoff": { type: "number", default: 8000 }
+    "fc": { type: "number", default: 8000, alias: "cutoff" }
     /** 0..1 (default 0.5) */
     "amount": { type: "number", default: 0.5 }
     /** 0..1 (default 0.5) */

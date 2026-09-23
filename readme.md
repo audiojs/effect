@@ -412,12 +412,12 @@ distortion(buf, { drive: 0.7, type: 'foldback' })
 
 Aphex-style aural exciter. Extracts the high band via SVF highpass, runs it through tanh saturation to synthesize harmonics, then mixes the harmonic residue back into the dry signal. Adds perceived "air" and "presence" without EQ boost.
 
-**`freq`** highpass cutoff Hz (default 3000) · **`drive`** saturation amount 0–1 (default 0.5, maps to 1–10× gain) · **`amount`** mix-in level 0–1 (default 0.5) · **`fs`** sample rate
+**`fc`** highpass cutoff Hz (default 3000; `freq` still accepted) · **`drive`** saturation amount 0–1 (default 0.5, maps to 1–10× gain) · **`amount`** mix-in level 0–1 (default 0.5) · **`fs`** sample rate
 
 ```js
 import { exciter } from '@audio/effect'
 
-let p = { freq: 4000, drive: 0.6, amount: 0.4, fs: 44100 }
+let p = { fc: 4000, drive: 0.6, amount: 0.4, fs: 44100 }
 for (let buf of stream) exciter(buf, p)
 ```
 

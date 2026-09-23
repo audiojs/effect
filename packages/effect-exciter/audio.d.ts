@@ -11,6 +11,8 @@ type Process = (inputs: Float32Array[][], outputs: Float32Array[][], params: Liv
 /** Chainable-host options for 'exciter' */
 export interface ExciterOptions {
   /** 500..8000 Hz (default 3000) */
+  "fc"?: Auto
+  /** @deprecated former name of "fc" */
   "freq"?: Auto
   /** 0..1 (default 0.5) */
   "drive"?: Auto
@@ -25,7 +27,7 @@ export declare const exciter: {
   channels: "any"
   params: {
     /** 500..8000 Hz (default 3000) */
-    "freq": { type: "number", default: 3000 }
+    "fc": { type: "number", default: 3000, alias: "freq" }
     /** 0..1 (default 0.5) */
     "drive": { type: "number", default: 0.5 }
     /** 0..1 (default 0.5) */

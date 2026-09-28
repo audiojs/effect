@@ -4,7 +4,7 @@
  * mixed back into dry signal. Aphex-style aural exciter.
  */
 
-let {sin, tanh, PI} = Math
+let {tan, tanh, min, PI} = Math
 
 export default function exciter (data, params = {}) {
 	let fc     = params.fc ?? params.freq ?? 3000   // highpass cutoff Hz (`freq`: former name)
@@ -17,16 +17,19 @@ export default function exciter (data, params = {}) {
 		params._bp = 0
 	}
 	let lp = params._lp, bp = params._bp
-	let f = 2 * sin(PI * fc / fs)
-	let q = 0.5                          // moderate damping
+	let w = tan(PI * min(fc, 0.49 * fs) / fs)   // prewarped cutoff
+	let k = 0.5                          // moderate damping (Q 2)
+	let a = 1 / (1 + w * (w + k))
 	let g = 1 + drive * 9                // 1×–10×
 
 	for (let i = 0, l = data.length; i < l; i++) {
 		let x = data[i]
-		// Chamberlin SVF — highpass tap generates high-band
-		lp += f * bp
-		let hp = x - lp - q * bp
-		bp += f * hp
+		// trapezoidal state-variable filter (Zavalishin, The Art of VA Filter Design, ch. 3–4; Simper 2013),
+		// highpass tap: stable at any fc below Nyquist, where Chamberlin's form diverged once f² + 2fk > 4
+		let v1 = a * (bp + w * (x - lp)), v2 = lp + w * v1
+		bp = 2 * v1 - bp
+		lp = 2 * v2 - lp
+		let hp = x - k * v1 - v2
 		// Tanh saturation synthesizes harmonics above `fc`
 		data[i] = x + amount * tanh(hp * g) * 0.5
 	}

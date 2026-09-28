@@ -67,6 +67,41 @@ test('wah — produces bandpass-like output', () => {
 	ok(data.every(isFinite), 'no NaN/Inf')
 })
 
+test('wah (manual): the analog bandpass s/(s² + s/Q + 1), bilinear-mapped with prewarping at fc', () => {
+	// the trapezoidal SVF is that map exactly (Zavalishin, The Art of VA Filter Design, 2018, ch. 3–4):
+	// |H(e^jω)| = Ω / √((1 − Ω²)² + (Ω/Q)²), Ω = tan(ω/2) / tan(π fc/fs)
+	let worst = 0
+	for (let fs of [16000, 44100]) for (let fc of [300, 1000, 3000]) for (let Q of [0.5, 5, 20]) {
+		let h = new Float64Array(fs); h[0] = 1
+		fx.wah(h, { mode: 'manual', fc, Q, fs })
+		for (let f of [50, 0.7 * fc, fc, 1.4 * fc, 0.45 * fs]) {
+			let w = 2 * Math.PI * f / fs, re = 0, im = 0
+			for (let i = 0; i < h.length; i++) { re += h[i] * Math.cos(w * i); im -= h[i] * Math.sin(w * i) }
+			let W = Math.tan(w / 2) / Math.tan(Math.PI * fc / fs)
+			worst = Math.max(worst, Math.abs(Math.hypot(re, im) * Math.hypot(1 - W * W, W / Q) / W - 1))
+		}
+	}
+	ok(worst < 1e-9, `worst relative magnitude error ${worst.toExponential(1)}`)
+})
+
+test('wah, autoWah, exciter, sbr: finite and bounded at every corner of their ranges, 16–48 kHz', async () => {
+	// Chamberlin's SVF (f = 2 sin(π fc/fs)) diverges once f² + 2f/Q > 4: a wah at fc 3000, Q 0.5 went to NaN at 16 kHz
+	let atoms = [['wah', 'effect-wah', 'wah'], ['autoWah', 'effect-autowah', 'autowah'], ['exciter', 'effect-exciter', 'exciter'], ['sbr', 'effect-sbr', 'sbr']]
+	for (let [fn, pkg, name] of atoms) {
+		let spec = (await import(`./packages/${pkg}/audio.js`))[name].params
+		let nums = Object.entries(spec).filter(([, s]) => s.type === 'number'), modes = spec.mode?.values ?? [undefined]
+		let bad = []
+		for (let fs of [16000, 22050, 44100, 48000]) for (let m = 0; m < 1 << nums.length; m++) for (let mode of modes) {
+			let p = Object.fromEntries(nums.map(([k, s], j) => [k, m >> j & 1 ? s.max : s.min]))
+			if (mode) p.mode = mode
+			let x = Float64Array.from({ length: 8192 }, (_, i) => Math.sin(2 * Math.PI * 100 * i / fs) >= 0 ? 1 : -1)
+			let y = fx[fn](x, { ...p, fs }), pk = y.reduce((a, v) => Math.max(a, Math.abs(v)), 0)
+			if (!(pk < 64)) bad.push(`${fs} ${JSON.stringify(p)}: peak ${pk}`)
+		}
+		ok(!bad.length, `${fn}: ${bad.length} unstable corners${bad.length ? ', first ' + bad[0] : ''}`)
+	}
+})
+
 test('tremolo — modulates amplitude', () => {
 	let data = dc(44100, 1)  // 1 second — enough for full LFO cycle
 	fx.tremolo(data, { rate: 5, depth: 1, fs: 44100 })

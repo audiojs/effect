@@ -2,7 +2,7 @@
  * Wah-wah — swept resonant bandpass filter
  */
 
-let {sin, pow, PI} = Math
+let {sin, tan, pow, min, PI} = Math
 
 export default function wah (data, params = {}) {
 	let rate = params.rate == null ? 1.5 : params.rate
@@ -19,7 +19,7 @@ export default function wah (data, params = {}) {
 	}
 	let lp = params._lp, bp = params._bp, phase = params._phase
 	let inc = 2 * PI * rate / fs
-	let q = 1 / Q
+	let k = 1 / Q, top = 0.49 * fs
 
 	for (let i = 0, l = data.length; i < l; i++) {
 		let freq
@@ -32,12 +32,14 @@ export default function wah (data, params = {}) {
 			freq = fc
 		}
 
-		let f = 2 * sin(PI * freq / fs)
-		let x = data[i]
-		lp += f * bp
-		let hp = x - lp - q * bp
-		bp += f * hp
-		data[i] = bp
+		// trapezoidal state-variable bandpass (Zavalishin, The Art of VA Filter Design, ch. 3–4; Simper 2013):
+		// the analog s/(s² + s/Q + 1) mapped bilinearly, prewarped to freq; stable at any Q, any freq below
+		// Nyquist. Chamberlin's form (f = 2 sin(π freq/fs)) diverged wherever f² + 2f/Q > 4.
+		let g = tan(PI * min(freq, top) / fs)
+		let v1 = (bp + g * (data[i] - lp)) / (1 + g * (g + k)), v2 = lp + g * v1
+		bp = 2 * v1 - bp
+		lp = 2 * v2 - lp
+		data[i] = v1
 	}
 
 	params._lp = lp

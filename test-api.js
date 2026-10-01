@@ -159,6 +159,25 @@ test('multitap — default tap cache is reused between blocks', () => {
   assert.equal(opts._tapSamples, taps); assert.equal(opts.buffer, buffer)
 })
 
+test('delay factory — dry bypass has no tail; unknown automation reserves a finite tail', () => {
+  const params = { time: Float32Array.of(0.25), feedback: Float32Array.of(0.3), mix: Float32Array.of(0) }
+  for (const sampleRate of [16000, 48000, 96000]) {
+    for (const mix of [0, -1]) {
+      params.mix[0] = mix
+      assert.equal(delayFactory.tail({ sampleRate, params }), 0)
+    }
+    for (const mix of [0.5, 1, NaN]) {
+      params.mix[0] = mix
+      assert.ok(delayFactory.tail({ sampleRate, params }) > 0)
+    }
+    const automated = { ...params, time: Float32Array.of(NaN), feedback: Float32Array.of(NaN) }
+    const max = { ...params, time: Float32Array.of(4), feedback: Float32Array.of(0.95) }
+    const tail = delayFactory.tail({ sampleRate, params: automated })
+    assert.ok(Number.isFinite(tail))
+    assert.ok(tail >= delayFactory.tail({ sampleRate, params: max }))
+  }
+})
+
 test('delay factories — tail follows settings, reaches -60 dB, and includes long feedback echoes', () => {
   for (const factory of [delayFactory, pingpongFactory]) {
     for (const sampleRate of [44100, 48000, 96000]) {

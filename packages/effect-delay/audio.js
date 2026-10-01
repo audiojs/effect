@@ -21,8 +21,12 @@ export const delay = (ctx) => {
 }
 delay.channels = 'any'
 delay.tail = ({ sampleRate, params }) => {
-	const fb = Math.abs(params.feedback[0])
-	const time = Math.max(1, Math.floor(params.time[0] * sampleRate)) / sampleRate
+	if (params.mix?.[0] <= 0) return 0
+	// A planning snapshot can contain NaN for automation, whose future values are
+	// unknown. Reserve the declared maximum decay, never a zero/NaN tail.
+	const fb = Number.isFinite(params.feedback[0]) ? Math.max(0, Math.min(0.95, params.feedback[0])) : 0.95
+	const seconds = Number.isFinite(params.time[0]) ? Math.max(0.001, Math.min(4, params.time[0])) : 4
+	const time = Math.max(1, Math.floor(seconds * sampleRate)) / sampleRate
 	return time * (fb === 0 ? 1 : 1 + Math.ceil(Math.log(1e-3) / Math.log(fb)))
 } // Time to decay by 60 dB at the supplied settings; not a hard silence boundary.
 delay.params = {

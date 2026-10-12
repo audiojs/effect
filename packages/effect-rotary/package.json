@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-rotary",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Rotary speaker (Leslie) simulation — split horn/drum rotors, Doppler + directivity AM",
   "type": "module",
   "sideEffects": false,

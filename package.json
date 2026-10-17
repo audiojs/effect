@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect",
-  "version": "2.1.7",
+  "version": "2.2.0",
   "type": "module",
   "sideEffects": false,
   "description": "Audio effects — umbrella for @audio/effect-* atoms (modulation, delay, distortion, utility)",
@@ -9,17 +9,24 @@
       "types": "./index.d.ts",
       "default": "./index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./*": {
+      "types": "./members/*.d.ts",
+      "default": "./members/*.js"
+    }
   },
   "scripts": {
     "test": "node --test test.js test-api.js",
     "plot": "node plot/generate.js",
     "test:all": "npm test --workspaces --if-present && npm test",
-    "publish:all": "npm publish --workspaces && npm publish"
+    "publish:all": "npm publish --workspaces && npm publish",
+    "members": "node scripts/members.js",
+    "prepublishOnly": "node scripts/members.js --check"
   },
   "files": [
     "index.js",
-    "*.d.ts"
+    "*.d.ts",
+    "members/"
   ],
   "keywords": [
     "audio",
@@ -54,32 +61,32 @@
   "homepage": "https://github.com/audiojs/effect#readme",
   "main": "index.js",
   "dependencies": {
-    "@audio/effect-phaser": "^1.0.0",
-    "@audio/effect-flanger": "^2.0.0",
-    "@audio/effect-chorus": "^2.0.0",
-    "@audio/effect-wah": "^1.0.0",
-    "@audio/effect-autowah": "^1.0.0",
-    "@audio/effect-tremolo": "^1.0.0",
-    "@audio/effect-vibrato": "^2.0.0",
-    "@audio/effect-ringmod": "^1.0.0",
-    "@audio/effect-freqshift": "^1.0.0",
-    "@audio/effect-delay": "^1.0.0",
-    "@audio/effect-multitap": "^1.0.0",
-    "@audio/effect-pingpong": "^1.0.0",
-    "@audio/effect-distortion": "^1.0.0",
-    "@audio/effect-bitcrusher": "^1.0.0",
-    "@audio/effect-exciter": "^1.0.0",
-    "@audio/effect-gain": "^1.0.0",
-    "@audio/effect-mixer": "^1.0.0",
-    "@audio/effect-slew": "^1.0.0",
-    "@audio/effect-noiseshaper": "^1.0.0",
-    "@audio/effect-graindelay": "^1.0.0",
-    "@audio/effect-lofi": "^1.0.0",
-    "@audio/effect-sbr": "^1.0.0",
-    "@audio/effect-stutter": "^1.0.0",
-    "@audio/effect-subbass": "^1.0.0",
-    "@audio/effect-rotary": "^0.1.0",
-    "@audio/effect-tapestop": "^0.1.0"
+    "@audio/effect-phaser": "^1.1.6",
+    "@audio/effect-flanger": "^2.0.2",
+    "@audio/effect-chorus": "^2.0.2",
+    "@audio/effect-wah": "^1.1.5",
+    "@audio/effect-autowah": "^1.1.5",
+    "@audio/effect-tremolo": "^1.1.5",
+    "@audio/effect-vibrato": "^2.0.2",
+    "@audio/effect-ringmod": "^1.1.5",
+    "@audio/effect-freqshift": "^1.1.6",
+    "@audio/effect-delay": "^1.0.5",
+    "@audio/effect-multitap": "^1.1.6",
+    "@audio/effect-pingpong": "^1.1.5",
+    "@audio/effect-distortion": "^1.1.5",
+    "@audio/effect-bitcrusher": "^1.1.5",
+    "@audio/effect-exciter": "^1.2.1",
+    "@audio/effect-gain": "^1.1.2",
+    "@audio/effect-mixer": "^1.0.2",
+    "@audio/effect-slew": "^1.1.5",
+    "@audio/effect-noiseshaper": "^1.1.5",
+    "@audio/effect-graindelay": "^1.1.6",
+    "@audio/effect-lofi": "^1.1.6",
+    "@audio/effect-sbr": "^1.2.1",
+    "@audio/effect-stutter": "^1.1.6",
+    "@audio/effect-subbass": "^1.2.0",
+    "@audio/effect-rotary": "^0.1.2",
+    "@audio/effect-tapestop": "^0.1.2"
   },
   "funding": "https://github.com/sponsors/audiojs",
   "types": "./index.d.ts"

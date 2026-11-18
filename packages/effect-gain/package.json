@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-gain",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Gain — simple level adjustment in dB",
   "type": "module",
   "sideEffects": false,

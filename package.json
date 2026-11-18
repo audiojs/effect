@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "sideEffects": false,
   "description": "Audio effects — umbrella for @audio/effect-* atoms (modulation, delay, distortion, utility)",
@@ -61,9 +61,9 @@
   "homepage": "https://github.com/audiojs/effect#readme",
   "main": "index.js",
   "dependencies": {
-    "@audio/effect-phaser": "^1.1.6",
-    "@audio/effect-flanger": "^2.0.2",
-    "@audio/effect-chorus": "^2.0.2",
+    "@audio/effect-phaser": "^1.2.0",
+    "@audio/effect-flanger": "^2.1.0",
+    "@audio/effect-chorus": "^2.1.0",
     "@audio/effect-wah": "^1.2.0",
     "@audio/effect-autowah": "^1.1.6",
     "@audio/effect-tremolo": "^1.2.0",

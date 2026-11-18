@@ -21,6 +21,7 @@ export interface SlewOptions {
 export declare const slew: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 10..20000 (default 1000) */
     "rise": { type: "number", default: 1000 }

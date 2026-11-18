@@ -51,9 +51,9 @@ For one effect: `npm install @audio/effect-delay`, then `import delay from '@aud
 | Operation | Input/output | State |
 |---|---|---|
 | Mono effects, such as `gain`, `delay`, `chorus` | `effect(buffer, params?)` modifies and returns that same buffer. | Reuse one params object across chunks to continue history. |
-| `pingPong`, `rotary` | `effect(left, right, params?)` modifies both and returns `[left, right]`. | Equal channel lengths required (otherwise RangeError). One params object per stereo instance. Rotary averages its inputs to mono before producing stereo. |
+| `pingPong`, `rotary` | `effect(left, right, params?)` modifies both and returns `[left, right]`. | Equal channel lengths required (otherwise RangeError). One params object per stereo instance. Rotary averages its inputs to mono before producing stereo. `rotaryInPlace` from `@audio/effect-rotary` and `pingPongInPlace` from `@audio/effect-pingpong` do the same and return nothing. |
 | `mixer` | `mixer([{ buffer, gain }, ...])` returns a new Float64Array; inputs remain unchanged. | Stateless; empty input returns an empty buffer. Unequal lengths throw RangeError. |
-| `tapeStop` | Modifies and returns its buffer. | Whole-buffer operation; do not split it into streaming chunks. |
+| `tapeStop` | Modifies and returns its buffer. | Whole-buffer operation; do not split it into chunks. `tapestopStream` from `@audio/effect-tapestop` is the same stop over a stream. |
 
 PCM buffers may be Float32Array or Float64Array; TypeScript preserves the supplied array type in the return value. Omitted options (or `undefined`) create fresh defaults for that call. For continuous processing, keep the same mutable options object; use a fresh object with the same settings to reset. Keep separate state for separate channels unless the function explicitly takes a stereo pair. Do not pass `null` as the options object.
 
@@ -61,7 +61,7 @@ For example, after the complete example above, `delay(nextChunk, params)` contin
 
 `fs` is sample rate in Hz, default 44100. Time/delay and envelope attack/release in this family are seconds; LFO/carrier frequencies are Hz; mix/depth and feedback are linear ratios. `gain.dB` is decibels. Check individual options for exceptions such as semitones, sample counts and slew rates. Dynamics is a separate API and uses milliseconds for attack/release.
 
-The leaf `/audio` exports are host processor factories. Their parameter metadata can limit ranges, smooth controls, or mark changes as requiring a restart. The direct buffer functions do not automatically smooth arbitrary parameter changes. A delay-time restart discards its tail and can click; it is not a pitch-gliding tape-delay control.
+The leaf `/audio` exports are host processor factories. Their parameter metadata can limit ranges, smooth controls, or mark changes as requiring a restart. The direct buffer functions do not automatically smooth arbitrary parameter changes. A new delay time moves the read across the call from where the last call left it, bending the pitch as a tape delay does, the read running no slower than half speed and no faster than double; it keeps the line's history. The chorus's and the flanger's `delay` and lofi's `wow` and `flutter` move their reads the same way. A value that scales the signal (the `mix` of the delay, ping-pong, grain delay, frequency shifter, rotary and stutter, gain's `dB`, tremolo's `depth`, subbass's and sbr's levels and drive, stutter's `decay`, the phaser's `feedback`) is smoothed (over 20 ms; gain's `dB` over 10) and played sample by sample along the host's ramp, so a move never steps the output, however the host cuts its calls; a value that holds is the kernel's own, sample for sample. The ring modulator's and the distortion's `mix` are smoothed and taken once a call. The wah's and the phaser's `fc` glide across each call; the exciter's and sbr's `fc`, lofi's `lowpass` and `highpass` and the rotary's `crossover` are smoothed so that a host ramps them, retuned each call. A factory's `tail` is the time until what the input leaves stays 60 dB under the input's level: it counts the gain a ring starts at (a resonance's peak, the echoes of a loop piling up, a saturator's slope), and a ring of 128 frames or less declares none. Given a value that is not finite (automation whose values are not known yet), it reserves the longest tail that value's range can ring.
 
 
 ## Modulation
@@ -72,7 +72,9 @@ LFO-driven effects that vary a parameter periodically.
 
 Cascade of swept allpass filters creating moving notches and peaks.
 
-**`rate`** LFO rate in Hz (default 0.5) · **`depth`** sweep depth 0–1 (default 0.7) · **`stages`** allpass stages (default 4) · **`feedback`** 0–1 (default 0.5) · **`fc`** center frequency Hz (default 1000) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 0.5) · **`depth`** sweep depth 0–1 (default 0.7) · **`stages`** allpass stages (default 4) · **`feedback`** 0–1 (default 0.5) · **`fc`** center frequency Hz (default 1000) · **`phase`** LFO phase of each channel ahead of the one before, degrees −180–180 (default 90; 0 moves the channels together) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this), so identical left and right come out different; channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` glides across the next call. A change of `stages` crossfades over 20 ms, however the calls fall, from the cascade before to the new one; the stages that enter start from silence, and a count asked during a crossfade follows when it ends.
 
 ```js
 import { phaser } from '@audio/effect'
@@ -91,9 +93,11 @@ for (let buf of stream) phaser(buf, p)
 
 Modulated short delay (1–10 ms) with feedback — creates comb filter sweep.
 
-**`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 0.3) · **`depth`** modulation depth 0–1 (default 0.7) · **`delay`** center delay in seconds (default 0.003) · **`feedback`** 0–1 (default 0.5) · **`phase`** LFO phase of each channel ahead of the one before, degrees −180–180 (default 90; 0 moves the channels together) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
 
-A zero center delay uses a one-sample feedback ring. Sub-sample ring sizes are clamped to one sample.
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this), so identical left and right come out different; channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase`, `depth` or `delay` glides across the next call.
+
+A zero center delay uses a one-sample feedback ring. The ring is floor(2 · `delay` · `fs`) + 1 samples, enough for the farthest read (twice the center delay, at depth 1), so a center delay under half a sample also gets one sample. A ring made for a longer delay holds a shorter one, every sample at its age; the `/audio` factory makes it for the longest delay, 0.02 seconds. The swept delay is held at one sample or more, as the feedback loop cannot read the sample it is about to write.
 
 ```js
 import { flanger } from '@audio/effect'
@@ -112,9 +116,11 @@ for (let buf of stream) flanger(buf, p)
 
 Multiple detuned delay voices layered over dry signal — ensemble thickening.
 
-**`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 1.5) · **`depth`** modulation depth 0–1 (default 0.5) · **`delay`** center delay in seconds (default 0.02) · **`voices`** number of chorus voices (default 3) · **`phase`** offset of each channel's voices from the channel before's, degrees −180–180 of the voice spacing (default 90; 0 moves the channels together) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
 
-A zero center delay is passthrough; sub-sample ring sizes are clamped to one sample.
+The voices sit 360/`voices` degrees of LFO apart, and `phase` divides that spacing as degrees divide a cycle: 180 puts a channel's voices halfway between the other's, and with one voice it is LFO degrees. In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this), so identical left and right come out different; channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole spacing on and moves with channel 0. A change of `phase`, `depth` or `delay` glides across the next call. A change of `voices` crossfades over 20 ms, however the calls fall, from the voices before to as many again, spaced from voice 0, each set at its own lead; a count asked during a crossfade follows when it ends.
+
+A zero center delay is passthrough. A ring made for a longer delay holds a shorter one, every sample at its age; the `/audio` factory makes it for the longest delay, 0.05 seconds, and the LFO phases for 8 voices.
 
 ```js
 import { chorus } from '@audio/effect'
@@ -133,7 +139,9 @@ for (let buf of stream) chorus(buf, p)
 
 Swept resonant bandpass filter — auto (LFO) or fixed frequency mode.
 
-**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth in octaves, 0–3 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth in octaves, 0–3 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`phase`** LFO phase of each channel ahead of the one before, in `'auto'` mode, degrees −180–180 (default 0, the channels together; at 180 they sweep opposite ways) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this). Channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` glides across the next call.
 
 ```js
 import { wah } from '@audio/effect'
@@ -152,7 +160,9 @@ for (let buf of stream) wah(buf, p)
 
 Amplitude modulation via LFO — periodic volume pulsing.
 
-**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1 (default 0.5) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1 (default 0.5) · **`phase`** LFO phase of each channel ahead of the one before, degrees −180–180 (default 0, the channels together; 180 is an auto-pan) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this). At 180, the left gain rises as the right falls and the two add to 2 − `depth`: an auto-pan. Channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` glides across the next call.
 
 ```js
 import { tremolo } from '@audio/effect'
@@ -171,7 +181,9 @@ for (let buf of stream) tremolo(buf, p)
 
 Pitch modulation via modulated delay line — periodic pitch wobble.
 
-**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`phase`** LFO phase of each channel ahead of the one before, degrees −180–180 (default 0, the channels together; at 180 their pitches swing opposite ways) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this). Channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` or `depth` glides across the next call; the delay ring holds depth 1 from the first call.
 
 ```js
 import { vibrato } from '@audio/effect'
@@ -201,7 +213,9 @@ let p = { hornSpeed: 6.7, drumSpeed: 5.9, fs: 44100 }
 rotary(left, right, p)   // left, right now hold the two virtual-mic outputs
 ```
 
-Switching `hornSpeed`/`drumSpeed` mid-stream glides through the inertia model instead of snapping — the classic chorale↔tremolo swell.
+Switching `hornSpeed`/`drumSpeed` mid-stream glides through the inertia model instead of snapping — the classic chorale↔tremolo swell. A change of `depth` or `micSpread` glides across the next call, a new `crossover`, smoothed so that a host ramps it, rewrites the filter sections in place, and a new `mix` glides sample by sample.
+
+The rotors' delay is the model's, not latency: the path from each rotor to a mic, up to twice its radius over the speed of sound (2 · 0.09 m / 343 m/s, 23 samples at 44.1 kHz, for the horn at rest facing the left mic). At `mix` 0 the output is the input, undelayed.
 
 **Use when**: organ/guitar Leslie emulation, spinning-speaker swells<br>
 **Not for**: plain stereo chorus (use chorus) or static stereo widening (use `@audio/spatial`)
@@ -302,9 +316,9 @@ const output = delay(input, p)
 console.log(output === input, output[4800], output[9600]) // true, 0.5, 0.25
 ```
 
-Time is quantized to `max(1, floor(time * fs))` samples: zero and sub-sample times use one sample, keeping the feedback loop causal. Changing this effective length resets buffered history, including when shrinking it or changing `fs`; unchanged length preserves history. Empty buffers do not advance or reset the line. Non-finite/negative time or non-finite/non-positive `fs` throws RangeError before modifying input/state.
+The delay is `max(1, time * fs)` samples: zero and sub-sample times use one sample, keeping the feedback loop causal. A delay between two frames is read between them (linear interpolation); a time within a Float32 step of a whole frame, as a host passes it, reads that frame exactly (`delaySamples(time, fs)` from `@audio/effect-delay` gives the length). A new time moves the read across the call from the time the last call ended on, at most half a frame a frame farther back and a frame a frame nearer, as a tape delay's head runs between half speed and double; a farther move goes on across the calls after, and then the read sits on the time. The ring keeps its history while it holds the time: a ring too short for a longer time or a new `fs` is made anew, empty, so give `buffer` a `Float64Array` long enough (`floor(delaySamples(longest, fs)) + 2`) to keep it. Empty buffers do not advance or reset the line. Non-finite/negative time or non-finite/non-positive `fs` throws RangeError before modifying input/state.
 
-Keep `abs(feedback) < 1` for a decaying tail; the direct function does not clamp feedback or mix. Reuse `p` across chunks, including silence to drain echoes, and use a fresh options object to reset. The `/audio` factory limits feedback to 0–0.95 and time to 0.001–4 seconds; time changes restart it. Its `tail(ctx)` estimates decay by 60 dB at the supplied settings, rather than imposing a fixed eight-second limit. A known `mix: 0` has no tail. Unknown automated mix retains the wet tail; non-finite time/feedback planning values reserve their declared maxima. This is not exact silence; hosts taking a finite snapshot must account for later automation. Disconnected inputs are processed as silence so existing tails drain.
+Keep `abs(feedback) < 1` for a decaying tail; the direct function does not clamp feedback or mix. Reuse `p` across chunks, including silence to drain echoes, and use a fresh options object to reset. The `/audio` factory limits feedback to 0–0.95 and time to 0.001–4 seconds, and makes each ring for 4 seconds, so `time` is live: smoothed over 20 ms, it bends the echo's pitch as it moves. A move bends over those 20 ms where the host's ramp asks the read to go at most half a frame a frame farther or a frame a frame nearer: 10 ms longer or 20 ms shorter where each call of the ramp is 32 frames (at 48, 96 and 192 kHz in audio's host), less where a call of the ramp is cut shorter and carries a 32-frame step in its k frames: 20 · k / 64 ms longer or 20 · k / 32 ms shorter (5.6 and 11.3 ms at 44.1 kHz, whose 882-frame ramp ends in a call of 18; 7.8 and 15.6 ms at 22.05 kHz, a call of 25; 2.5 and 5 ms at 176.4 kHz, of 8; 1.25 and 2.5 ms at 88.2 kHz, of 4). A farther move bends the echo an octave at most, down while the time grows, for twice the increase, and up while it shrinks, for as long as the decrease (0.25 s to 2 s is 3.5 s an octave down); one that reverses while under way turns from an octave down to an octave up in one frame, two octaves at once. While the time shrinks the read runs faster than the line, and what the line holds above a quarter of the sample rate folds below it, as loud as it was. `sync` (`'off'`, `'1/2'`, `'1/4'`, `'1/4t'`, `'1/8d'`, `'1/8'`, `'1/8t'`, `'1/16'`; default `'off'`) sets the time to that note at the host's tempo (`ctx.transport.bpm`, a quarter note a beat; `d` dotted, `t` triplet), held to 4 seconds; a new tempo or note glides across the call after it, or bends at the read's bound where that is slower; `'off'` leaves `time` in charge. Its `tail(ctx)` estimates decay by 60 dB at the supplied settings, rather than imposing a fixed eight-second limit: 60 dB under the input's level, so it counts the echoes of a held sound piling up to `mix / (1 − feedback)` times it. A known `mix: 0` has no tail. Unknown automated mix retains the wet tail; non-finite time/feedback planning values reserve their declared maxima, and so does a sync to a note when the host hands the tail no transport (with one, the note at its tempo). This is not exact silence; hosts taking a finite snapshot must account for later automation, and a time cut short just before the input stops rings longer than the new time's tail while the read is still on its way down. Disconnected inputs are processed as silence so existing tails drain.
 
 **Use when**: slap-back echo, rhythmic delays<br>
 **Not for**: diffuse reverberation (use reverb)
@@ -347,9 +361,9 @@ let p = { time: 0.15, feedback: 0.5, mix: 0.5, fs: 44100 }
 for (let [L, R] of stereoStream) pingPong(L, R, p)
 ```
 
-Both channels must have equal lengths; a mismatch throws before processing. Delay time uses `max(1, floor(time * fs))` samples. Changing the effective length resets both rings; empty channels do not advance or reset them. Reuse one params object for successive stereo chunks, or create a fresh one to reset. Time and sample-rate validation match the mono delay. Keep `abs(feedback) < 1` for decay; the direct function does not clamp it.
+Both channels must have equal lengths; a mismatch throws before processing. The delay is read as the mono delay reads it, between frames where it falls between them, and a new time moves both reads across the call from the time the last call ended on, as fast as the mono delay's read at most. Rings too short for a longer time are made anew, empty (give `_bufL` and `_bufR` long enough to keep them); empty channels do not advance or reset them. Reuse one params object for successive stereo chunks, or create a fresh one to reset. Time and sample-rate validation match the mono delay. Keep `abs(feedback) < 1` for decay; the direct function does not clamp it.
 
-The `/audio` factory limits feedback to 0–0.9 and time to 0.01–2 seconds. Time changes restart it. Its tail estimate describes 60 dB decay at the supplied settings, not a hard silence boundary; disconnected inputs drain through silent blocks.
+The `/audio` factory limits feedback to 0–0.9 and time to 0.01–2 seconds and makes both rings for 2 seconds, so `time` is live, smoothed over 20 ms; a far move bends the echoes an octave at most, as the mono delay's does. `sync` sets the time to a note at the host's tempo, as the mono delay's does, held to 2 seconds. Each block calls the in-place form. Its tail estimate describes 60 dB decay at the supplied settings (with sync on, at the note at the tempo the host hands it, or at the longest time where it hands none; a value not known yet reserves its range's longest), not a hard silence boundary; disconnected inputs drain through silent blocks.
 
 **Use when**: stereo width from delays, spatial depth, rhythmic bounce effects<br>
 **Not for**: mono output
@@ -609,7 +623,7 @@ for (let buf of stream) noiseShaping(buf, { bits: 16 })
 
 ### Tape stop
 
-Variable-rate playback with a decelerating (or accelerating) read pointer — turntable power-off / tape-deck stop, and the reverse spin-up. Whole-buffer effect: needs the full signal in one call, not a per-block stream.
+Variable-rate playback with a decelerating (or accelerating) read pointer — turntable power-off / tape-deck stop, and the reverse spin-up. `tapeStop` works on the whole buffer in one call. `tapestopStream` from `@audio/effect-tapestop`, and the `/audio` factory with it, give the same stop over a stream, `at` seconds into it: they run as many frames late as flutter can speed the tape past the input at the stop's start (`lead(fs, options)`; none without flutter or in `'start'`).
 
 **`at`** when the stop/start begins, in seconds (default 0) · **`time`** ramp duration in seconds (default 1) · **`curve`** speed-profile exponent — 1 = physical constant-torque linear decay, >1 = faster initial drop, <1 = held then dropping (default 1) · **`direction`** `'stop'` or `'start'` (default `'stop'`) · **`flutter`** 0–1 random rate wobble during the ramp (default 0)
 

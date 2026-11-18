@@ -1,11 +1,13 @@
 // atom manifest — wraps the bitcrusher atom; stateful hold/phase but no sizing
-// params — every param stays live, per-channel state is just the held sample + phase.
+// params — every param stays live, per-channel state is just the held sample + phase,
+// made here so the first block sets nothing up. A sample is held at most 1 / rate.min =
+// 100 frames, under a 128-frame ring: no tail.
 
 import bitcrusherFn from './bitcrusher.js'
 
 export const bitcrusher = (ctx) => {
 	const chP = []
-	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate })
+	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate, _held: 0, _phase: 0 })
 	return (inputs, outputs, params) => {
 		const inp = inputs[0], out = outputs[0]
 		if (!inp || !inp.length) return

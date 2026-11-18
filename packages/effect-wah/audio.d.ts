@@ -20,6 +20,8 @@ export interface WahOptions {
   "Q"?: Auto
   /** default "auto" */
   "mode"?: "auto" | "manual"
+  /** -180..180 deg (default 0) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -27,6 +29,7 @@ export interface WahOptions {
 export declare const wah: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0.05..10 Hz (default 1.5) */
     "rate": { type: "number", default: 1.5 }
@@ -38,5 +41,7 @@ export declare const wah: {
     "Q": { type: "number", default: 5 }
     /** default "auto" */
     "mode": { type: "enum", values: ["auto","manual"], default: "auto" }
+    /** -180..180 deg (default 0) */
+    "phase": { type: "number", default: 0 }
   }
 }

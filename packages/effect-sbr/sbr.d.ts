@@ -21,6 +21,7 @@ export interface SbrOptions {
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the source bandpass, output highpass, and envelope-
- * follower state persist on it (`_src`, `_hp1`, `_hp2`, `_env`, `_henv`, `_dc`).
+ * follower state persist on it (`_src`, `_hp1`, `_hp2`, `_env`, `_henv`, `_dc`). `lanes`, when given, holds amount
+ * and drive for each sample of `data`, `M` apart, in place of the params': the `/audio` factory's glide of moving values.
  */
-export default function sbr<T extends Float32Array | Float64Array>(data: T, params?: SbrOptions): T
+export default function sbr<T extends Float32Array | Float64Array>(data: T, params?: SbrOptions, lanes?: Float64Array, M?: number): T

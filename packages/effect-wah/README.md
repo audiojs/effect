@@ -12,7 +12,9 @@ import wah from '@audio/effect-wah'
 
 Swept resonant bandpass filter — auto (LFO) or fixed frequency mode.
 
-**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth in octaves, 0–3 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 1.5) · **`depth`** sweep depth in octaves, 0–3 (default 0.8) · **`fc`** center frequency Hz (default 1000) · **`Q`** resonance (default 5) · **`mode`** `'auto'` LFO or `'manual'` fixed (default `'auto'`) · **`phase`** LFO phase of each channel ahead of the one before, in `'auto'` mode, degrees −180–180 (default 0, the channels together; at 180 they sweep opposite ways) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this). Channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` glides across the next call.
 
 ```js
 import wah from '@audio/effect-wah'

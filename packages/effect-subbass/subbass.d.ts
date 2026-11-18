@@ -22,6 +22,7 @@ export interface SubbassOptions {
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the sub-extraction and harmonic-band filter state persist
- * on it (`_sub`, `_out`, `_dc`).
+ * on it (`_sub`, `_out`, `_dc`). `lanes`, when given, holds amount, drive and keep for each sample of `data`, `M`
+ * apart, in place of the params': the `/audio` factory's glide of moving values.
  */
-export default function subbass<T extends Float32Array | Float64Array>(data: T, params?: SubbassOptions): T
+export default function subbass<T extends Float32Array | Float64Array>(data: T, params?: SubbassOptions, lanes?: Float64Array, M?: number): T

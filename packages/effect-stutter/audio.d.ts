@@ -25,11 +25,11 @@ export interface StutterOptions {
 export declare const stutter: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 2
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
-    /** 0.05..2 s (default 0.5) [restart] */
+    /** 0.05..2 s (default 0.5) */
     "interval": { type: "number", default: 0.5 }
-    /** 0.01..1 s (default 0.125) [restart] */
+    /** 0.01..1 s (default 0.125) */
     "slice": { type: "number", default: 0.125 }
     /** 0..1 (default 0) */
     "decay": { type: "number", default: 0 }

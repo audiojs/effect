@@ -23,7 +23,7 @@ export interface FreqshiftOptions {
 export declare const freqshift: {
   (ctx: Ctx): Process
   channels: "any"
-  latency: (ctx: { sampleRate: number, params: Live }) => number
+  latency: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** -2000..2000 Hz (default 100) */
     "shift": { type: "number", default: 100 }

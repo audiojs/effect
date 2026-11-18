@@ -23,8 +23,28 @@ export interface TapestopOptions {
 }
 
 /**
- * Mutates `data` in place and returns the same reference. Whole-buffer effect —
- * the read-pointer integration spans the full buffer, so it needs the complete
- * signal in one call, not a per-block stream; no state persists across calls.
+ * Mutates `data` in place and returns the same reference. Whole-buffer form: one
+ * call over the complete signal; no state persists across calls. `tapestopStream`
+ * is the same stop over a stream.
  */
 export default function tapeStop<T extends Float32Array | Float64Array>(data: T, options?: TapestopOptions): T
+
+export interface TapestopStreamOptions extends TapestopOptions {
+  /** frames the output runs late, at least `lead(fs, options)`, default 0 */
+  latency?: number
+}
+
+/**
+ * The same stop over a stream: what the default writes, `latency` frames late, in
+ * place, its state carried on `options` from call to call (`_ring`, the input it
+ * still has to read, made on the first call when absent; `_n`, `_read`, `_start`,
+ * `_rnd`). The stop begins at frame `at` of the stream, read each call until it has.
+ */
+export function tapestopStream<T extends Float32Array | Float64Array>(data: T, options: TapestopStreamOptions): T
+
+/**
+ * The most frames past the one it writes that the read takes input from, at these
+ * settings: how late `tapestopStream` must run. Nonzero only in 'stop' with flutter,
+ * which can speed the tape past the input at the stop's start.
+ */
+export function lead(fs?: number, options?: TapestopOptions): number

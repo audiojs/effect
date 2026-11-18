@@ -33,7 +33,7 @@ export interface RotaryOptions {
 export declare const rotary: {
   (ctx: Ctx): Process
   channels: {"inputs":1,"outputs":2}
-  tail: 0.05
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0..10 Hz (default 0.8) */
     "hornSpeed": { type: "number", default: 0.8 }

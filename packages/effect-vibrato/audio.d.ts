@@ -14,6 +14,8 @@ export interface VibratoOptions {
   "rate"?: Auto
   /** 0..1 (default 0.5) */
   "depth"?: Auto
+  /** -180..180 deg (default 0) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -21,11 +23,13 @@ export interface VibratoOptions {
 export declare const vibrato: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 0.02
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0.1..15 Hz (default 5) */
     "rate": { type: "number", default: 5 }
-    /** 0..1 (default 0.5) [restart] */
+    /** 0..1 (default 0.5) */
     "depth": { type: "number", default: 0.5 }
+    /** -180..180 deg (default 0) */
+    "phase": { type: "number", default: 0 }
   }
 }

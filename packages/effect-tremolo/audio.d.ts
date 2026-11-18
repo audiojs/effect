@@ -14,6 +14,8 @@ export interface TremoloOptions {
   "rate"?: Auto
   /** 0..1 (default 0.5) */
   "depth"?: Auto
+  /** -180..180 deg (default 0) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -26,5 +28,7 @@ export declare const tremolo: {
     "rate": { type: "number", default: 5 }
     /** 0..1 (default 0.5) */
     "depth": { type: "number", default: 0.5 }
+    /** -180..180 deg (default 0) */
+    "phase": { type: "number", default: 0 }
   }
 }

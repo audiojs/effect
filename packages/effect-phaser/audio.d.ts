@@ -20,6 +20,8 @@ export interface PhaserOptions {
   "feedback"?: Auto
   /** 100..5000 Hz (default 1000) */
   "fc"?: Auto
+  /** -180..180 deg (default 90) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -27,16 +29,19 @@ export interface PhaserOptions {
 export declare const phaser: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0.02..10 Hz (default 0.5) */
     "rate": { type: "number", default: 0.5 }
     /** 0..1 (default 0.7) */
     "depth": { type: "number", default: 0.7 }
-    /** 2..12 (default 4) [restart] */
+    /** 2..12 (default 4) */
     "stages": { type: "number", default: 4 }
     /** 0..0.9 (default 0.5) */
     "feedback": { type: "number", default: 0.5 }
     /** 100..5000 Hz (default 1000) */
     "fc": { type: "number", default: 1000 }
+    /** -180..180 deg (default 90) */
+    "phase": { type: "number", default: 90 }
   }
 }

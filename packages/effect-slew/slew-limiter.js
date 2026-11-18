@@ -11,7 +11,7 @@ export default function slewLimiter (data, params = {}) {
 	let maxRise = rise / fs
 	let maxFall = fall / fs
 
-	let y = params.y != null ? params.y : data[0]
+	let y = params.y == null || params.y !== params.y ? data[0] : params.y  // seeded from the first sample when absent or NaN
 
 	for (let i = 0, l = data.length; i < l; i++) {
 		let diff = data[i] - y

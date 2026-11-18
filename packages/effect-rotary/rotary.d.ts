@@ -11,13 +11,13 @@ export interface RotaryOptions {
   mix?: number
   /** horn/drum crossover split, Hz, default 800 */
   crossover?: number
-  /** Doppler + directivity modulation intensity, 0–1 (clamped), default 1 */
+  /** Doppler + directivity modulation intensity, 0–1 (clamped), default 1; a change glides across the next call */
   depth?: number
   /** horn spin-up/down time constant, seconds, default 0.6 */
   hornInertia?: number
   /** drum spin-up/down time constant, seconds, default 2.5 (the heavier drum lags the horn) */
   drumInertia?: number
-  /** angle between the two virtual mics, radians, default π/2 (≈1.5708) */
+  /** angle between the two virtual mics, radians, default π/2 (≈1.5708); a change glides across the next call */
   micSpread?: number
   /**
    * horn rotor target rate, Hz. When either `hornSpeed` or `drumSpeed` is set,
@@ -51,7 +51,8 @@ export interface RotaryOptions {
  * references). Pass the same params object across calls — the crossover filter
  * state, per-rotor delay rings, phases, and inertia-glided rates persist on it
  * (`_sos`, `_hornBuf`, `_drumBuf`, `_hornPtr`, `_drumPtr`, `_hornPhase`,
- * `_drumPhase`, `_hornF`, `_drumF`, `_lpState`, `_hpState`). Switching
+ * `_drumPhase`, `_hornF`, `_drumF`, `_lpState`, `_hpState`, and `_glide`, where the
+ * last call's depth and spread ended). A new `crossover` rewrites the sections in place. Switching
  * `hornSpeed`/`drumSpeed`/`speed` mid-stream glides through the inertia model
  * instead of snapping.
  */
@@ -60,3 +61,11 @@ export default function rotary<L extends Float32Array | Float64Array, R extends 
   right: R,
   params?: RotaryOptions
 ): [L, R]
+
+/**
+ * The same as the default, without the pair it returns: what a host's block loop calls, as it
+ * may allocate nothing. Throws as the default does on channel lengths that do not match. `mixes`, when given, holds the
+ * mix for each frame, in place of `params.mix`, and the kernel runs at a mix of 0 while it moves: the `/audio` factory's
+ * glide of a moving mix.
+ */
+export function rotaryInPlace(left: Float32Array | Float64Array, right: Float32Array | Float64Array, params?: RotaryOptions, mixes?: Float64Array): void

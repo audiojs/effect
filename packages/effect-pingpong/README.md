@@ -21,9 +21,9 @@ let p = { time: 0.15, feedback: 0.5, mix: 0.5, fs: 44100 }
 for (let [L, R] of stereoStream) pingPong(L, R, p)
 ```
 
-Both channels must have equal lengths; a mismatch throws before processing. Delay time uses `max(1, floor(time * fs))` samples. Changing the effective length resets both rings; empty channels do not advance or reset them. Reuse one params object for successive stereo chunks, or create a fresh one to reset. Time and sample-rate validation match the mono delay. Keep `abs(feedback) < 1` for decay; the direct function does not clamp it.
+Both channels must have equal lengths; a mismatch throws before processing. The delay is read as the mono delay reads it, between frames where it falls between them, and a new time moves both reads across the call from the time the last call ended on, as fast as the mono delay's read at most. Rings too short for a longer time are made anew, empty (give `_bufL` and `_bufR` long enough to keep them); empty channels do not advance or reset them. Reuse one params object for successive stereo chunks, or create a fresh one to reset. Time and sample-rate validation match the mono delay. Keep `abs(feedback) < 1` for decay; the direct function does not clamp it.
 
-The `/audio` factory limits feedback to 0–0.9 and time to 0.01–2 seconds. Time changes restart it. Its tail estimate describes 60 dB decay at the supplied settings, not a hard silence boundary; disconnected inputs drain through silent blocks.
+The `/audio` factory limits feedback to 0–0.9 and time to 0.01–2 seconds and makes both rings for 2 seconds, so `time` is live, smoothed over 20 ms; a far move bends the echoes an octave at most, as the mono delay's does. `sync` sets the time to a note at the host's tempo, as the mono delay's does, held to 2 seconds. Each block calls the in-place form. Its tail estimate describes 60 dB decay at the supplied settings (with sync on, at the note at the tempo the host hands it, or at the longest time where it hands none; a value not known yet reserves its range's longest), not a hard silence boundary; disconnected inputs drain through silent blocks.
 
 **Use when**: stereo width from delays, spatial depth, rhythmic bounce effects<br>
 **Not for**: mono output

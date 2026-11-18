@@ -16,6 +16,8 @@ export interface DelayOptions {
   "feedback"?: Auto
   /** 0..1 (default 0.5) */
   "mix"?: Auto
+  /** default "off" */
+  "sync"?: "off" | "1/2" | "1/4" | "1/4t" | "1/8d" | "1/8" | "1/8t" | "1/16"
   at?: number | string
   duration?: number | string
 }
@@ -23,13 +25,15 @@ export interface DelayOptions {
 export declare const delay: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: (ctx: { sampleRate: number, params: Live }) => number
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
-    /** 0.001..4 s (default 0.25) [restart] */
+    /** 0.001..4 s (default 0.25) */
     "time": { type: "number", default: 0.25 }
     /** 0..0.95 (default 0.3) */
     "feedback": { type: "number", default: 0.3 }
     /** 0..1 (default 0.5) */
     "mix": { type: "number", default: 0.5 }
+    /** default "off" */
+    "sync": { type: "enum", values: ["off","1/2","1/4","1/4t","1/8d","1/8","1/8t","1/16"], default: "off" }
   }
 }

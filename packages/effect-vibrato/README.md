@@ -12,7 +12,9 @@ import vibrato from '@audio/effect-vibrato'
 
 Pitch modulation via modulated delay line — periodic pitch wobble.
 
-**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`fs`** sample rate
+**`rate`** LFO rate in Hz (default 5) · **`depth`** modulation depth 0–1, scales a max ~6ms delay-time swing (default 0.5) · **`phase`** LFO phase of each channel ahead of the one before, degrees −180–180 (default 0, the channels together; at 180 their pitches swing opposite ways) · **`channel`** index of the channel this call processes (default 0) · **`fs`** sample rate
+
+In stereo, each channel keeps its own params object with its `channel` index (the `/audio` factory does this). Channel 0 never shifts, so a mono signal is the same at any `phase`. Channel c runs c × `phase` ahead, so at 90 channel 4 is a whole cycle on and moves with channel 0. A change of `phase` or `depth` glides across the next call; the delay ring holds depth 1 from the first call.
 
 ```js
 import vibrato from '@audio/effect-vibrato'

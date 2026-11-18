@@ -10,7 +10,7 @@ npm install @audio/effect-tapestop
 import tapeStop from '@audio/effect-tapestop'
 ```
 
-Variable-rate playback with a decelerating (or accelerating) read pointer — turntable power-off / tape-deck stop, and the reverse spin-up. Whole-buffer effect: needs the full signal in one call, not a per-block stream.
+Variable-rate playback with a decelerating (or accelerating) read pointer — turntable power-off / tape-deck stop, and the reverse spin-up. `tapeStop` works on the whole buffer in one call. `tapestopStream` from `@audio/effect-tapestop`, and the `/audio` factory with it, give the same stop over a stream, `at` seconds into it: they run as many frames late as flutter can speed the tape past the input at the stop's start (`lead(fs, options)`; none without flutter or in `'start'`).
 
 **`at`** when the stop/start begins, in seconds (default 0) · **`time`** ramp duration in seconds (default 1) · **`curve`** speed-profile exponent — 1 = physical constant-torque linear decay, >1 = faster initial drop, <1 = held then dropping (default 1) · **`direction`** `'stop'` or `'start'` (default `'stop'`) · **`flutter`** 0–1 random rate wobble during the ramp (default 0)
 

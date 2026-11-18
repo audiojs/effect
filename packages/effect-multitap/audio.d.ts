@@ -19,7 +19,7 @@ export interface MultitapOptions {
 export declare const multitap: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: (ctx: { sampleRate: number, params: Live }) => number
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0..0.9 (default 0) */
     "feedback": { type: "number", default: 0 }

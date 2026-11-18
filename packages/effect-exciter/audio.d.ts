@@ -25,6 +25,7 @@ export interface ExciterOptions {
 export declare const exciter: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 500..8000 Hz (default 3000) */
     "fc": { type: "number", default: 3000, alias: "freq" }

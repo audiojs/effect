@@ -5,9 +5,9 @@
  * deterministic and reproducible.
  */
 export interface LofiOptions {
-  /** slow pitch drift, 0–1, ~0.7 Hz, up to 3 ms, default 0.3 */
+  /** slow pitch drift, 0–1, ~0.7 Hz, up to 3 ms, default 0.3; a change glides across the next call, the read moving at most half a frame a frame farther or a frame nearer (half speed to double) */
   wow?: number
-  /** fast wobble, 0–1, ~7 Hz, up to 0.4 ms, default 0.2 */
+  /** fast wobble, 0–1, ~7 Hz, up to 0.4 ms, default 0.2; a change glides as wow's does */
   flutter?: number
   /** hiss bed level, 0–1, default 0.1 */
   noise?: number
@@ -28,6 +28,7 @@ export interface LofiOptions {
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — delay-line, LFO phase, filter, and noise state persist on
- * it (`_buf`, `_ph1`, `_ph2`, `_lp1`..`_lp3`, `_hp`, `_rnd`, `_crk`).
+ * it (`_buf`, `_ph1`, `_ph2`, `_lp1`..`_lp3`, `_hp`, `_rnd`, `_crk`), with where the last call's wow, flutter and read
+ * ended (`_glide`).
  */
 export default function lofi<T extends Float32Array | Float64Array>(data: T, params?: LofiOptions): T

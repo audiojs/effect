@@ -1,12 +1,12 @@
 // atom manifest — wraps the noise-shaping atom; single-sample error-feedback
 // loop, no sizing params — every param stays live, per-channel state is just the
-// running feedback error term.
+// running feedback error term, made here so the first block sets nothing up.
 
 import noiseShapingFn from './noise-shaping.js'
 
 export const noiseshaper = (ctx) => {
 	const chP = []
-	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate })
+	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate, _fb: 0 })
 	return (inputs, outputs, params) => {
 		const inp = inputs[0], out = outputs[0]
 		if (!inp || !inp.length) return

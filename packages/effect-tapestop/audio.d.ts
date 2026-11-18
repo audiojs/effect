@@ -27,17 +27,18 @@ export interface TapestopOptions {
 export declare const tapestop: {
   (ctx: Ctx): Process
   channels: "any"
-  streaming: false
+  latency: (at: { sampleRate: number, params: Live, buffers: {} }) => number
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0..60 s (default 0) */
     "at": { type: "number", default: 0 }
-    /** 0.05..10 s (default 1) */
+    /** 0.05..10 s (default 1) [restart] */
     "time": { type: "number", default: 1 }
-    /** 0.25..4 (default 1) */
+    /** 0.25..4 (default 1) [restart] */
     "curve": { type: "number", default: 1 }
-    /** default "stop" */
+    /** default "stop" [restart] */
     "direction": { type: "enum", values: ["stop","start"], default: "stop" }
-    /** 0..1 (default 0) */
+    /** 0..1 (default 0) [restart] */
     "flutter": { type: "number", default: 0 }
   }
 }

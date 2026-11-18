@@ -11,6 +11,6 @@ export interface SlewLimiterOptions {
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the running output sample persists on it (`y`, seeded
- * from `data[0]` on the first call if absent).
+ * from `data[0]` on the first call if absent or NaN).
  */
 export default function slewLimiter<T extends Float32Array | Float64Array>(data: T, params?: SlewLimiterOptions): T

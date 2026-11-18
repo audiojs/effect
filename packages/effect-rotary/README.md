@@ -23,7 +23,9 @@ let p = { hornSpeed: 6.7, drumSpeed: 5.9, fs: 44100 }
 rotary(left, right, p)   // left, right now hold the two virtual-mic outputs
 ```
 
-Switching `hornSpeed`/`drumSpeed` mid-stream glides through the inertia model instead of snapping — the classic chorale↔tremolo swell.
+Switching `hornSpeed`/`drumSpeed` mid-stream glides through the inertia model instead of snapping — the classic chorale↔tremolo swell. A change of `depth` or `micSpread` glides across the next call, a new `crossover`, smoothed so that a host ramps it, rewrites the filter sections in place, and a new `mix` glides sample by sample.
+
+The rotors' delay is the model's, not latency: the path from each rotor to a mic, up to twice its radius over the speed of sound (2 · 0.09 m / 343 m/s, 23 samples at 44.1 kHz, for the horn at rest facing the left mic). At `mix` 0 the output is the input, undelayed.
 
 **Use when**: organ/guitar Leslie emulation, spinning-speaker swells<br>
 **Not for**: plain stereo chorus (use chorus) or static stereo widening (use `@audio/spatial`)

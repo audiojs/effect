@@ -10,13 +10,18 @@ export interface WahOptions {
   Q?: number
   /** `'auto'` sweeps `fc` with the LFO; `'manual'` pins the filter at `fc`, default 'auto' */
   mode?: 'auto' | 'manual'
+  /** LFO phase of each channel ahead of the one before, in `mode: 'auto'`, degrees, −180–180, default 0 (the channels move together); at 180 they sweep opposite ways. A change glides across the next call */
+  phase?: number
+  /** index of the channel this call processes, default 0; its LFO runs `channel × phase` degrees ahead */
+  channel?: number
   /** sample rate, default 44100 */
   fs?: number
 }
 
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
- * object across calls — the filter state and LFO phase persist on it (`_lp`,
- * `_bp`, `_phase`).
+ * object across calls — the filter state, LFO phase and where the last call's
+ * lead and fc ended persist on it (`_lp`, `_bp`, `_phase`, `_glide`). A new fc glides across the call, the filter
+ * retuned each sample.
  */
 export default function wah<T extends Float32Array | Float64Array>(data: T, params?: WahOptions): T

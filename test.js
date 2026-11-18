@@ -301,16 +301,32 @@ test('ringMod — mix=0 is passthrough', () => {
 // Dynamics
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('delay — echo at specified time', () => {
-	let N = 44100
-	let data = impulse(N)
-	fx.delay(data, { time: 0.1, feedback: 0, mix: 1, fs: 44100 })
-	// Expect echo at sample 4410
-	let echoPeak = 0, echoIdx = 0
-	for (let i = 1000; i < N; i++) {
-		if (Math.abs(data[i]) > echoPeak) { echoPeak = Math.abs(data[i]); echoIdx = i }
+test('delay, pingPong, multitap – the echo where a time given as a Float32 puts it: on its frame, or split over the two around it', () => {
+	// a host passes every number as a Float32: 5 ms arrives as 0.004999999888, 10 ms as 0.009999999776, 250 ms exact
+	let hits = d => [...d.keys()].filter(i => d[i] !== 0)
+	for (let fs of [44100, 48000, 96000]) for (let ms of [5, 10, 250]) {
+		let time = Math.fround(ms / 1000), n = Math.ceil(ms * fs / 1000) + 2
+		// |frame − ms·fs/1000| ≤ ½, in integers: 5 ms at 44.1 kHz is 220.5 frames, 220 and 221 equally near
+		let nearest = i => Math.abs(i * 1000 - ms * fs) <= 500
+		let d = fx.delay(impulse(n), { time, feedback: 0, mix: 1, fs })
+		let [l, r] = fx.pingPong(impulse(n), new Float64Array(n), { time, feedback: 0, mix: 1, fs })
+		let m = fx.multitap(impulse(n), { taps: [{ time, gain: 1 }], fs })
+		is(m[0], 1, 'multitap passes the dry impulse')
+		// multitap's taps sit on whole frames, the nearest
+		ok(hits(m).length === 2 && nearest(hits(m)[1]) && m[hits(m)[1]] === 1, `multitap, ${ms} ms at ${fs} Hz: echo at [${hits(m).slice(1)}], expected ${ms * fs / 1000}`)
+		// delay and pingPong read at the time itself. A whole frame, as the Float32 holds it (all but 5 ms at 44.1 kHz), is
+		// one echo of 1 on that frame; 220.5 frames splits the echo over frames 220 and 221 by the fraction, centred on it
+		let at = time * fs, whole = ms * fs % 1000 === 0, f = at - Math.floor(at)
+		for (let [name, out] of [['delay', d], ['pingPong', l]]) {
+			let h = hits(out), where = `${name}, ${ms} ms at ${fs} Hz: echo at [${h}] of [${h.map(i => out[i])}], the time at ${at}`
+			if (whole) ok(h.length === 1 && h[0] * 1000 === ms * fs && out[h[0]] === 1, where)
+			else {
+				ok(h.length === 2 && h[0] === Math.floor(at) && h[1] === h[0] + 1 && out[h[0]] === 1 - f && out[h[1]] === f, where)
+				almost(h[0] * out[h[0]] + h[1] * out[h[1]], at, 1e-9)
+			}
+		}
+		is(hits(r).length, 0, 'pingPong: no feedback, nothing crosses to the right')
 	}
-	ok(Math.abs(echoIdx - 4410) < 10, `echo at sample ${echoIdx} (expected ~4410)`)
 })
 
 test('delay — feedback creates repeating echoes', () => {
@@ -619,6 +635,21 @@ test('stutter — decay attenuates successive repeats', () => {
 	ok(r3 < r1 * 0.5, `later repeats quieter (${r3.toFixed(3)} < ${r1.toFixed(3)})`)
 })
 
+test('stutter – slice and interval on the frames nearest the times, given as Float32', () => {
+	// a host passes every number as a Float32: 10 ms arrives as 0.009999999776, 0.7 s as 0.699999988, 250 ms exact
+	for (let fs of [44100, 48000, 96000]) for (let ms of [10, 250]) {
+		let sN = ms * fs / 1000, iN = 7 * fs / 10, opts = () => ({ interval: Math.fround(0.7), slice: Math.fround(ms / 1000), decay: 0, mix: 1, fs })
+		// an impulse mid-slice (clear of the edge fades) repeats one slice later
+		let p = sN >> 1, d = new Float64Array(iN + 1); d[p] = 1
+		fx.stutter(d, opts())
+		ok(d[p + sN] === 1, `${ms} ms slice at ${fs} Hz: repeat at frame ${p + sN}`)
+		// the next capture starts at frame iN and passes the dry; the frame before it still plays the (silent) slice
+		let e = new Float64Array(iN + 1); e[iN - 1] = e[iN] = 1
+		fx.stutter(e, opts())
+		ok(e[iN - 1] === 0 && e[iN] === 1, `0.7 s interval at ${fs} Hz: capture restarts at frame ${iN}`)
+	}
+})
+
 test('lofi — bandwidth ceiling kills 12 kHz, keeps 500 Hz', () => {
 	let n = 44100
 	let d = new Float64Array(n)
@@ -789,6 +820,18 @@ test('tapestop — content before `at` is bit-identical to input', () => {
 	let maxErr = 0
 	for (let i = 0; i < atN; i++) maxErr = Math.max(maxErr, Math.abs(data[i] - orig[i]))
 	ok(maxErr === 0, `pre-'at' region unchanged: err=${maxErr}`)
+})
+
+test('tapestop – `at` on the frame nearest the time, given as a Float32', () => {
+	// 0.7 s as a host passes it is 0.699999988. A ramp input shows the read position: rate 1 on the stop's first
+	// frame, below 1 from its second, so the output leaves the ramp first at frame at·fs + 2
+	for (let fs of [44100, 48000, 96000]) {
+		let atN = 7 * fs / 10
+		let data = Float64Array.from({ length: atN + 16 }, (_, i) => i)
+		fx.tapeStop(data, { at: Math.fround(0.7), time: 1, fs })
+		let first = data.findIndex((x, i) => x !== i)
+		is(first, atN + 2, `${fs} Hz: the stop starts at frame ${first - 2}, expected ${atN}`)
+	}
 })
 
 test('tapestop — curve=2 falls faster than curve=1 (linear) early in the ramp', () => {

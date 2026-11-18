@@ -17,7 +17,7 @@
 import crossoverFn from '@audio/eq-crossover'
 import { step, state } from '@audio/biquad'
 
-let { cos, floor, exp, PI } = Math
+let { cos, sin, tan, floor, exp, PI } = Math
 let PI2 = 2 * PI
 
 // Leslie 122 rotor rates (Hz) — DAFx-02 §2 / manufacturer lore.
@@ -32,10 +32,47 @@ function readDelay (buf, N, ptr, d) {
 	return a + frac * (b - a)
 }
 
+// x through one band's sections, each with its state. A function of its own: as a loop inside the sample loop it had
+// V8 box a number at every sample
+function band (sos, st, x) {
+	for (let s = 0; s < sos.length; s++) x = step(sos[s], st[s], x)
+	return x
+}
+
+// the LR4 crossover at fc written over the sections crossoverFn made, so a live split allocates nothing: each band two
+// copies of digital-filter's 2nd-order Butterworth section (its bilinear form at the prototype pole −sin(π/4) +
+// j cos(π/4), as @audio/eq-crossover designs it; a test holds the two equal), with its edge sections at 0 and Nyquist.
+// fc and fs arrive in `split`, a typed array: V8 does not inline this function, and a split between whole hertz passed
+// as an argument was boxed at each call, 16 bytes a block while the crossover moves
+const split = new Float64Array(2)
+function lr4 (sos, split) {
+	let fc = split[0], fs = split[1], lo = sos[0][0], hi = sos[1][0]
+	if (fc <= 0 || fc >= fs / 2) {
+		let pass = fc > 0
+		lo.b0 = pass ? 1 : 0; lo.b1 = lo.b2 = lo.a1 = lo.a2 = 0
+		hi.b0 = pass ? 0 : 1; hi.b1 = hi.b2 = hi.a1 = hi.a2 = 0
+	} else {
+		let sigma = -sin(PI / 4), omega = cos(PI / 4), pmag2 = sigma * sigma + omega * omega, bs = -2 * sigma
+		let K = 1 / tan(PI * fc / fs), A = K * K + bs * K + pmag2
+		lo.b0 = pmag2 / A; lo.b1 = 2 * pmag2 / A; lo.b2 = pmag2 / A; lo.a1 = 2 * (pmag2 - K * K) / A; lo.a2 = (K * K - bs * K + pmag2) / A
+		let B1 = bs / pmag2, B0 = 1 / pmag2, H = K * K + B1 * K + B0
+		hi.b0 = K * K / H; hi.b1 = -2 * K * K / H; hi.b2 = K * K / H; hi.a1 = 2 * (B0 - K * K) / H; hi.a2 = (K * K - B1 * K + B0) / H
+	}
+	same(sos[0][1], lo); same(sos[1][1], hi)
+}
+const same = (to, from) => { to.b0 = from.b0; to.b1 = from.b1; to.b2 = from.b2; to.a1 = from.a1; to.a2 = from.a2 }
+
 export default function rotary (left, right, params = {}) {
+	rotaryInPlace(left, right, params)
+	return [left, right]
+}
+
+// rotary without the pair it returns: what a host's block loop calls, as it may allocate nothing. `mixes`, when given,
+// holds the mix for each frame (the /audio manifest's glide of a moving mix), in place of params.mix
+export function rotaryInPlace (left, right, params = {}, mixes) {
 	if (left.length !== right.length) throw new RangeError('channel lengths must match')
 	let mix = params.mix == null ? 1 : params.mix
-	if (mix <= 0) return [left, right] // exact bypass — zero latency, nothing to compensate
+	if (mix <= 0 && !mixes) return // exact bypass — zero latency, nothing to compensate
 
 	let fs = params.fs || 44100
 	let xoFreq = params.crossover == null ? 800 : params.crossover
@@ -69,15 +106,16 @@ export default function rotary (left, right, params = {}) {
 	let d0DrumN = d0Drum * fs
 
 	// crossover coefficients — designed once and cached on params (per-block hosts call
-	// this in the realtime path: no allocation there); redesigned only when the split
+	// this in the realtime path: no allocation there); redesigned in place only when the split
 	// frequency or sample rate actually moves. LR4 section count is fixed for a single
 	// split, so the persistent filter *state* (below) stays valid across a redesign.
 	if (!params._sos || params._sosFreq !== xoFreq || params._sosFs !== fs) {
-		params._sos = crossoverFn([xoFreq], 4, fs) // [low, high] = [drum band, horn band]
+		if (!params._sos || !Number.isFinite(xoFreq)) params._sos = crossoverFn([xoFreq], 4, fs) // [low, high] = [drum band, horn band]
+		else { split[0] = xoFreq; split[1] = fs; lr4(params._sos, split) }
 		params._sosFreq = xoFreq
 		params._sosFs = fs
 	}
-	let [lowSOS, highSOS] = params._sos
+	let lowSOS = params._sos[0], highSOS = params._sos[1]
 
 	if (!params._hornBuf) {
 		// sized once for depth ∈ [0,1] worst case (2·d0); independent of live depth/xoFreq.
@@ -105,13 +143,19 @@ export default function rotary (left, right, params = {}) {
 	// heavier drum spins up/down slower than the lighter horn).
 	let hornCoef = 1 - exp(-1 / (hornInertia * fs))
 	let drumCoef = 1 - exp(-1 / (drumInertia * fs))
+	// depth and micSpread move the reads (depth the directivity gains too), so a new value is reached across this call
+	// from the one the last call ended on, as the chorus's depth and phase are: a host ramps a smoothed value in short
+	// calls, and this joins its steps into one line
+	// where the last call ended, for this one to glide from: NaN before the first call (only finite values are kept,
+	// in a Float64Array: kept as numbers on the params object, they boxed in V8 once two instances had run)
+	let ended = params._glide ??= new Float64Array(2).fill(NaN)
+	let depthFrom = ended[0] === ended[0] ? ended[0] : depth, depthGlide = depth - depthFrom
+	let spreadFrom = ended[1] === ended[1] ? ended[1] : micSpread, spreadGlide = micSpread - spreadFrom
 
 	for (let i = 0, l = left.length; i < l; i++) {
 		let mono = (left[i] + right[i]) * 0.5
 
-		let lo = mono, hi = mono
-		for (let s = 0; s < lowSOS.length; s++) lo = step(lowSOS[s], lpState[s], lo)
-		for (let s = 0; s < highSOS.length; s++) hi = step(highSOS[s], hpState[s], hi)
+		let lo = band(lowSOS, lpState, mono), hi = band(highSOS, hpState, mono)
 
 		hornF += (hornTarget - hornF) * hornCoef
 		drumF += (drumTarget - drumF) * drumCoef
@@ -124,24 +168,26 @@ export default function rotary (left, right, params = {}) {
 		drumBuf[drumPtr] = lo
 
 		// mic L @ angle 0, mic R @ angle micSpread — same rotor phase, shifted per mic.
+		let dp = depthFrom + depthGlide * (i + 1) / l, sp = spreadFrom + spreadGlide * (i + 1) / l
 		let hAngleL = hornPhase, dAngleL = drumPhase
-		let hAngleR = hornPhase + micSpread, dAngleR = drumPhase + micSpread
+		let hAngleR = hornPhase + sp, dAngleR = drumPhase + sp
 
-		let hDelL = d0HornN * (1 + depth * cos(hAngleL))
-		let dDelL = d0DrumN * (1 + depth * cos(dAngleL))
-		let hDelR = d0HornN * (1 + depth * cos(hAngleR))
-		let dDelR = d0DrumN * (1 + depth * cos(dAngleR))
+		let hDelL = d0HornN * (1 + dp * cos(hAngleL))
+		let dDelL = d0DrumN * (1 + dp * cos(dAngleL))
+		let hDelR = d0HornN * (1 + dp * cos(hAngleR))
+		let dDelR = d0DrumN * (1 + dp * cos(dAngleR))
 
-		let hGainL = 1 + depth * hornM * cos(hAngleL)
-		let dGainL = 1 + depth * drumM * cos(dAngleL)
-		let hGainR = 1 + depth * hornM * cos(hAngleR)
-		let dGainR = 1 + depth * drumM * cos(dAngleR)
+		let hGainL = 1 + dp * hornM * cos(hAngleL)
+		let dGainL = 1 + dp * drumM * cos(dAngleL)
+		let hGainR = 1 + dp * hornM * cos(hAngleR)
+		let dGainR = 1 + dp * drumM * cos(dAngleR)
 
 		let wetL = hGainL * readDelay(hornBuf, hornN, hornPtr, hDelL) + dGainL * readDelay(drumBuf, drumN, drumPtr, dDelL)
 		let wetR = hGainR * readDelay(hornBuf, hornN, hornPtr, hDelR) + dGainR * readDelay(drumBuf, drumN, drumPtr, dDelR)
 
-		left[i] = mono * (1 - mix) + wetL * mix
-		right[i] = mono * (1 - mix) + wetR * mix
+		let m = mixes ? mixes[i] : mix
+		left[i] = mono * (1 - m) + wetL * m
+		right[i] = mono * (1 - m) + wetR * m
 
 		hornPtr = (hornPtr + 1) % hornN
 		drumPtr = (drumPtr + 1) % drumN
@@ -150,6 +196,7 @@ export default function rotary (left, right, params = {}) {
 	params._hornPtr = hornPtr; params._drumPtr = drumPtr
 	params._hornPhase = hornPhase; params._drumPhase = drumPhase
 	params._hornF = hornF; params._drumF = drumF
-
-	return [left, right]
+	// kept only when finite, so the next call never glides from a value that is not finite
+	if (left.length && Number.isFinite(depth)) ended[0] = depth
+	if (left.length && Number.isFinite(micSpread)) ended[1] = micSpread
 }

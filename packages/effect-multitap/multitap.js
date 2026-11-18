@@ -4,6 +4,17 @@
 
 const defaults = [{ time: 0.25, gain: 0.5 }, { time: 0.5, gain: 0.3 }]
 
+// the summed reads of the taps from the ring buf, of N samples, written next at ptr. A function of its own: as a loop
+// inside the sample loop it had V8 allocate at every block
+function tapsAt (buf, N, ptr, taps) {
+	let wet = 0
+	for (let k = 0; k < taps.length; k++) {
+		let t = taps[k]
+		wet += buf[(ptr - t.d + N) % N] * t.gain
+	}
+	return wet
+}
+
 export default function multitap (data, params = {}) {
 	let taps = params.taps || defaults
 	let feedback = params.feedback ?? 0
@@ -14,7 +25,7 @@ export default function multitap (data, params = {}) {
 	if (params._taps !== taps || params._fs !== fs) {
 		let maxDelay = 1  // ≥1 so the ring buffer is never zero-length (taps at time 0)
 		params._tapSamples = taps.map(t => {
-			let d = (t.time * fs) | 0
+			let d = Math.round(t.time * fs) | 0  // nearest frame: a Float32 time truncated lands a frame early
 			if (d > maxDelay) maxDelay = d
 			return { d, gain: t.gain ?? 0.5 }
 		})
@@ -28,17 +39,13 @@ export default function multitap (data, params = {}) {
 		params.buffer = new Float64Array(params._maxDelay)
 		params.ptr = 0
 	}
-	let buf = params.buffer, ptr = params.ptr
+	let buf = params.buffer, N = buf.length, ptr = params.ptr
 
 	for (let i = 0, l = data.length; i < l; i++) {
 		let x = data[i]
-		let wet = 0
-		for (let t of tapSamples) {
-			let idx = (ptr - t.d + buf.length) % buf.length
-			wet += buf[idx] * t.gain
-		}
+		let wet = tapsAt(buf, N, ptr, tapSamples)
 		buf[ptr] = x + feedback * wet
-		ptr = (ptr + 1) % buf.length
+		ptr = (ptr + 1) % N
 		data[i] = x + wet
 	}
 

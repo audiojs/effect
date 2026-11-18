@@ -29,6 +29,7 @@ export interface AutowahOptions {
 export declare const autowah: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 50..1000 Hz (default 300) */
     "base": { type: "number", default: 300 }

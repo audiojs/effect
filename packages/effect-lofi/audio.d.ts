@@ -31,7 +31,7 @@ export interface LofiOptions {
 export declare const lofi: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 0.1
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0..1 (default 0.3) */
     "wow": { type: "number", default: 0.3 }

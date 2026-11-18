@@ -17,6 +17,7 @@ export interface FrequencyShifterOptions {
  * Mutates `data` in place and returns the same reference. Pass the same params
  * object across calls — the Hilbert FIR coefficients, history ring, and shift
  * oscillator phase persist on it (`_h`, `_buf`, `_p`, `_phase`). Output carries a
- * fixed `(taps - 1) / 2`-sample group delay at every `mix`.
+ * fixed `(taps - 1) / 2`-sample group delay at every `mix`. `mixes`, when given, holds the mix for each sample of
+ * `data`, in place of `params.mix`: the `/audio` factory's glide of a moving mix.
  */
-export default function frequencyShifter<T extends Float32Array | Float64Array>(data: T, params?: FrequencyShifterOptions): T
+export default function frequencyShifter<T extends Float32Array | Float64Array>(data: T, params?: FrequencyShifterOptions, mixes?: Float64Array): T

@@ -18,6 +18,8 @@ export interface ChorusOptions {
   "delay"?: Auto
   /** 1..8 (default 3) */
   "voices"?: Auto
+  /** -180..180 deg (default 90) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -25,15 +27,17 @@ export interface ChorusOptions {
 export declare const chorus: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: 0.1
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0.05..10 Hz (default 1.5) */
     "rate": { type: "number", default: 1.5 }
     /** 0..1 (default 0.5) */
     "depth": { type: "number", default: 0.5 }
-    /** 0.002..0.05 s (default 0.02) [restart] */
+    /** 0.002..0.05 s (default 0.02) */
     "delay": { type: "number", default: 0.02 }
-    /** 1..8 (default 3) [restart] */
+    /** 1..8 (default 3) */
     "voices": { type: "number", default: 3 }
+    /** -180..180 deg (default 90) */
+    "phase": { type: "number", default: 90 }
   }
 }

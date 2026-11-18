@@ -1,11 +1,12 @@
 // atom manifest — wraps the ring-mod atom; pure oscillator multiply, no sizing
-// params — every param stays live, per-channel state is just the running carrier phase.
+// params — every param stays live, per-channel state is just the running carrier phase,
+// made here so the first block sets nothing up.
 
 import ringModFn from './ring-mod.js'
 
 export const ringmod = (ctx) => {
 	const chP = []
-	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate })
+	for (let c = 0, N = ctx.maxChannels ?? 8; c < N; c++) chP.push({ fs: ctx.sampleRate, _phase: 0 })
 	return (inputs, outputs, params) => {
 		const inp = inputs[0], out = outputs[0]
 		if (!inp || !inp.length) return

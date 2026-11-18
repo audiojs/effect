@@ -31,17 +31,17 @@ export interface GraindelayOptions {
 export declare const graindelay: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: (ctx: { sampleRate: number, params: Live }) => number
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
-    /** 0.02..1.5 s (default 0.25) [restart] */
+    /** 0.02..1.5 s (default 0.25) */
     "time": { type: "number", default: 0.25 }
-    /** 0..0.1 s (default 0.02) [restart] */
+    /** 0..0.1 s (default 0.02) */
     "spray": { type: "number", default: 0.02 }
-    /** -24..24 st (default 0) [restart] */
+    /** -24..24 st (default 0) */
     "pitch": { type: "number", default: 0 }
-    /** 0..12 st (default 0) [restart] */
+    /** 0..12 st (default 0) */
     "jitter": { type: "number", default: 0 }
-    /** 0.01..0.3 s (default 0.08) [restart] */
+    /** 0.01..0.3 s (default 0.08) */
     "grain": { type: "number", default: 0.08 }
     /** 0..0.9 (default 0.3) */
     "feedback": { type: "number", default: 0.3 }

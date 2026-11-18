@@ -25,6 +25,7 @@ export interface SbrOptions {
 export declare const sbr: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 2000..16000 Hz (default 8000) */
     "fc": { type: "number", default: 8000, alias: "cutoff" }

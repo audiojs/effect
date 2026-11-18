@@ -18,6 +18,8 @@ export interface FlangerOptions {
   "delay"?: Auto
   /** 0..0.9 (default 0.5) */
   "feedback"?: Auto
+  /** -180..180 deg (default 90) */
+  "phase"?: Auto
   at?: number | string
   duration?: number | string
 }
@@ -25,15 +27,17 @@ export interface FlangerOptions {
 export declare const flanger: {
   (ctx: Ctx): Process
   channels: "any"
-  tail: (ctx: { sampleRate: number, params: Live }) => number
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 0.02..5 Hz (default 0.3) */
     "rate": { type: "number", default: 0.3 }
     /** 0..1 (default 0.7) */
     "depth": { type: "number", default: 0.7 }
-    /** 0.0001..0.02 s (default 0.003) [restart] */
+    /** 0.0001..0.02 s (default 0.003) */
     "delay": { type: "number", default: 0.003 }
     /** 0..0.9 (default 0.5) */
     "feedback": { type: "number", default: 0.5 }
+    /** -180..180 deg (default 90) */
+    "phase": { type: "number", default: 90 }
   }
 }

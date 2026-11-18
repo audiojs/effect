@@ -27,6 +27,7 @@ export interface SubbassOptions {
 export declare const subbass: {
   (ctx: Ctx): Process
   channels: "any"
+  tail: (at: { sampleRate: number, params: Live, buffers: {} }) => number
   params: {
     /** 30..200 Hz (default 80) */
     "fc": { type: "number", default: 80, alias: "freq" }

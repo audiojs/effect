@@ -5,7 +5,7 @@
  * against the uninterrupted dry signal.
  */
 export interface StutterOptions {
-  /** capture cycle length, seconds, default 0.5. Changing this (or `slice`) reallocates the capture buffer, dropping buffered history. */
+  /** capture cycle length, seconds, default 0.5. A new value (or a new `slice`) takes effect where the next cycle starts; the cycle under way keeps its lengths. */
   interval?: number
   /** captured slice length, seconds, default 0.125 */
   slice?: number
@@ -19,7 +19,10 @@ export interface StutterOptions {
 
 /**
  * Mutates `data` in place and returns the same reference. Pass the same params
- * object across calls — the captured slice buffer and cycle position persist on
- * it (`_slice`, `_pos`).
+ * object across calls — the captured slice buffer, cycle position and the lengths
+ * of the cycle under way persist on it (`_slice`, `_pos`, `_cycle`). A longer slice
+ * than the buffer holds grows it, keeping what it holds (the `/audio` factory makes
+ * it for 1 s). `lanes`, when given, holds decay and mix for each sample of `data`, `M` apart, in place of the
+ * params': the `/audio` factory's glide of moving values.
  */
-export default function stutter<T extends Float32Array | Float64Array>(data: T, params?: StutterOptions): T
+export default function stutter<T extends Float32Array | Float64Array>(data: T, params?: StutterOptions, lanes?: Float64Array, M?: number): T

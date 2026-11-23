@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-stutter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Stutter / beat-repeat — sliced buffer retrigger (Ableton Beat Repeat class)",
   "type": "module",
   "sideEffects": false,

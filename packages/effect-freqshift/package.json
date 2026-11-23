@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-freqshift",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Frequency shifter — single-sideband shift via Hilbert transform",
   "type": "module",
   "sideEffects": false,

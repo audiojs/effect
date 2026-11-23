@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-chorus",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Chorus — multiple detuned delay lines for ensemble thickening",
   "type": "module",
   "sideEffects": false,

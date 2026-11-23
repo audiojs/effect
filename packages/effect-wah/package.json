@@ -1,6 +1,6 @@
 {
   "name": "@audio/effect-wah",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Wah-wah — swept resonant bandpass filter",
   "type": "module",
   "sideEffects": false,
